@@ -48,17 +48,17 @@ Ay = kron(I,kron(B,I));
 Az = kron(B,kron(I,I));
 
 % System matrices
-r1 = mu/3; r2 = mu/4;
+r1 = mu/3; r2 = mu/4; r3 = mu;
 Id = kron(I,kron(I,I));
 A1x = (Id + r1*dt*Ax);
 A2x = (Id + r2*dt*Ax);
-A3x = (Id + dt*Ax);
+A3x = (Id + r3*dt*Ax);
 A1y = (Id + r1*dt*Ay);
 A2y = (Id + r2*dt*Ay);
-A3y = (Id + dt*Ay);
+A3y = (Id + r3*dt*Ay);
 A1z = (Id + r1*dt*Az);
 A2z = (Id + r2*dt*Az);
-A3z = (Id + dt*Az);
+A3z = (Id + r3*dt*Az);
 
 clear Ax Ay Az I Id B
 [L3x,U3x]=lu(A3x);
@@ -141,7 +141,7 @@ runtime = toc;
   Uplot = Usoln(:,:,steps);
   Vplot = Vsoln(:,:,steps);
 
-    figure(15)
+    figure(17)
     contourf(x,y,Uplot')
     xlabel('x')
     ylabel('y')
@@ -154,7 +154,7 @@ runtime = toc;
     set(gca,'YTick',[0 0.2 0.4 0.6 0.8 1]);
     print -depsc2 sliceu.eps
     
-    figure(16)
+    figure(18)
     contourf(x,y,Vplot')
     xlabel('x')
     ylabel('y')
