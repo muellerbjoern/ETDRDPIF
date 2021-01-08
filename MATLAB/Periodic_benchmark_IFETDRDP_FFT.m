@@ -104,54 +104,63 @@ A2z = (Id + r2*dt*Az);
 A3z = (Id + dt*Az);
 
 clear Ax Ay Az I Id B
+
+%# Note: Not duplicating curr_arr explicitly, because matrix blocks might
+%# be different!
+
 [L3x,U3x]=lu(A3x);
-f3x = [];
+f3x = zeros(steps*steps*steps, 1);
 curr_idx = 0;
 curr_arr = fft(full(A3x(curr_idx+1:curr_idx+steps, curr_idx+1)));
 for i = 0:steps*steps-1
-    %curr_idx = i*steps;
-    horzcat(f3x, curr_arr);
+    curr_idx = i*steps;
+    f3x(curr_idx+1:curr_idx+steps) = curr_arr;
 end
 [L3y,U3y]=lu(A3y);
-f3y = [];
+f3y = zeros(steps*steps*steps, 1);
+curr_idx = 0;
 curr_arr = fft(full(A3y(curr_idx+1:curr_idx+steps*steps, curr_idx+1)));
 for i = 0:steps-1
-    %curr_idx = i*steps*steps;
-    horzcat(f3y, curr_arr);
+    curr_idx = i*steps*steps;
+    f3y(curr_idx+1 : curr_idx + steps*steps) = curr_arr;
 end
 [L3z,U3z]=lu(A3z);
 f3z = fft(full(A3z(:,1)));
 
 [L2x,U2x]=lu(A2x);
-f2x = [];
+f2x = zeros(steps*steps*steps, 1);
+curr_idx = 0;
 curr_arr = fft(full(A2x(curr_idx+1:curr_idx+steps, curr_idx+1)));
 for i = 0:steps*steps-1
-    %curr_idx = i*steps;
-    horzcat(f2x, curr_arr);
+    curr_idx = i*steps;
+    f2x(curr_idx+1 : curr_idx + steps) = curr_arr;
 end
 [L2y,U2y]=lu(A2y);
-f2y = [];
+f2y = zeros(steps*steps*steps, 1);
+curr_idx = 0;
 curr_arr = fft(full(A2y(curr_idx+1:curr_idx+steps*steps, curr_idx+1)));
 for i = 0:steps-1
-    %curr_idx = i*steps*steps;
-    horzcat(f2y, curr_arr);
+    curr_idx = i*steps*steps;
+    f2y(curr_idx+1 : curr_idx + steps*steps) = curr_arr;
 end
 [L2z,U2z]=lu(A2z);
 f2z = fft(full(A2z(:,1)));
 
 [L1x,U1x]=lu(A1x);
-f1x = [];
+f1x = zeros(steps*steps*steps, 1);
+curr_idx = 0;
 curr_arr = fft(full(A1x(curr_idx+1:curr_idx+steps, curr_idx+1)));
 for i = 0:steps*steps-1
-    %curr_idx = i*steps;
-    horzcat(f1x, curr_arr);
+    curr_idx = i*steps;
+    f1x(curr_idx+1 : curr_idx + steps) = curr_arr;
 end
 [L1y,U1y]=lu(A1y);
-f1y = [];
+f1y = zeros(steps*steps*steps, 1);
+curr_idx = 0;
 curr_arr = fft(full(A1y(curr_idx+1:curr_idx+steps*steps, curr_idx+1)));
 for i = 0:steps-1
-    %curr_idx = i*steps*steps;
-    horzcat(f1y, curr_arr);
+    curr_idx = i*steps*steps;
+    f1y(curr_idx+1 : curr_idx + steps*steps) = curr_arr;
 end
 [L1z,U1z]=lu(A1z);
 f1z = fft(full(A1z(:,1)));
@@ -163,13 +172,45 @@ for i = 2:tlen
      
     F_old = F(u_old,v_old);
     % For u
-    p1 = U3x\(L3x\F_old(:,1));
-    p2 = U3y\(L3y\p1);
-    p3u = ifft(p2 ./ f3z);
+    %# TODO: Replace zeros by uninit (plugin!)
+    p1 = zeros(steps*steps*steps, 1);
+    for j = 0:steps*steps-1
+        curr_idx = j*steps;
+        if sum(isnan(ifft(fft(F_old(curr_idx+1:curr_idx+steps, 1)) ./ f3x(curr_idx+1:curr_idx+steps)))) > 0
+            fft(F_old(curr_idx+1:curr_idx+steps, 1))
+            f3x(curr_idx+1:curr_idx+steps)
+        end
+        p1(curr_idx+1:curr_idx+steps) = ifft(fft(F_old(curr_idx+1:curr_idx+steps, 1)) ./ f3x(curr_idx+1:curr_idx+steps));
+    end
+    
+    %#U3x\(L3x\F_old(:,1));
+    p2 = zeros(steps*steps*steps, 1); %#U3y\(L3y\p1);
+    for j = 0:steps-1
+        curr_idx = j*steps*steps;
+        p2(curr_idx+1:curr_idx+steps*steps) = ifft(fft(p1(curr_idx+1:curr_idx+steps*steps)) ./ f3y(curr_idx+1:curr_idx+steps*steps));
+    end
+    p3u = ifft(fft(p2) ./ f3z);
     % For v
-    p1 = U3x\(L3x\F_old(:,2));
-    p2 = U3y\(L3y\p1);
-    p3v = ifft(p2 ./ f3z);
+        p1 = zeros(steps*steps*steps, 1);
+    for j = 0:steps*steps-1
+        curr_idx = j*steps;
+        if sum(isnan(ifft(fft(F_old(curr_idx+1:curr_idx+steps, 1)) ./ f3x(curr_idx+1:curr_idx+steps)))) > 0
+            fft(F_old(curr_idx+1:curr_idx+steps, 2))
+            f3x(curr_idx+1:curr_idx+steps)
+        end
+        p1(curr_idx+1:curr_idx+steps) = ifft(fft(F_old(curr_idx+1:curr_idx+steps, 1)) ./ f3x(curr_idx+1:curr_idx+steps));
+    end
+    
+    %#U3x\(L3x\F_old(:,1));
+    p2 = zeros(steps*steps*steps, 1); %#U3y\(L3y\p1);
+    for j = 0:steps-1
+        curr_idx = j*steps*steps;
+        p2(curr_idx+1:curr_idx+steps*steps) = ifft(fft(p1(curr_idx+1:curr_idx+steps*steps)) ./ f3y(curr_idx+1:curr_idx+steps*steps));
+    end
+    p3v = ifft(fft(p2) ./ f3z);
+    %#p1 = U3x\(L3x\F_old(:,2));
+    %#p2 = U3y\(L3y\p1);
+    %#p3v = ifft(fft(p2) ./ f3z);
     
     % For u
     d1 = U3x\(L3x\u_old);
