@@ -171,104 +171,98 @@ f1z = fft(full(A1z(:,1)));
 
 p1 = zeros(steps*steps*steps, 1);
 p2 = zeros(steps*steps*steps, 1);
-%f3x = reshape(f3x, steps, []);
-%f3y = reshape(f3y, steps*steps, []);
+f3x = reshape(f3x, steps, []);
+f3y = reshape(f3y, steps*steps, []);
+f2x = reshape(f2x, steps, []);
+f2y = reshape(f2y, steps*steps, []);
+f1x = reshape(f1x, steps, []);
+f1y = reshape(f1y, steps*steps, []);
+
 tic
 for i = 2:tlen
   
     %#disp(i);
-    F_old = F(u_old, v_old);
-    %F_old = reshape(F(u_old,v_old), steps, [], 2);
+    %F_old = F(u_old, v_old);
+    F_old = reshape(F(u_old,v_old), steps, [], 2);
+    %F_old = F_old(1:steps*(steps+1):end, :, :);
     % For u
     %# TODO: Replace zeros by uninit (plugin!)
     
-%     p1 = ifft(fft(F_old(1:end:steps*(steps+1), 1)) ./ f3x);
-%     p1 = reshape(p1, steps*steps, []);
+    p1 = ifft(fft(F_old(:, :, 1)) ./ f3x);
+    p1 = reshape(p1, steps*steps, []);
     
-    for j = 0:steps*steps-1
-        curr_idx = j*steps;
-%         if sum(isnan(ifft(fft(F_old(curr_idx+1:curr_idx+steps, 1)) ./ f3x(curr_idx+1:curr_idx+steps)))) > 0
-%             fft(F_old(curr_idx+1:curr_idx+steps, 1))
-%             f3x(curr_idx+1:curr_idx+steps)
-%         end
-        p1(curr_idx+1:curr_idx+steps) = ifft(fft(F_old(curr_idx+1:curr_idx+steps, 1)) ./ f3x(curr_idx+1:curr_idx+steps));
-    end
-    
-    %#U3x\(L3x\F_old(:,1));
-     %#U3y\(L3y\p1);
-    for j = 0:steps-1
-        curr_idx = j*steps*steps;
-        p2(curr_idx+1:curr_idx+steps*steps) = ifft(fft(p1(curr_idx+1:curr_idx+steps*steps)) ./ f3y(curr_idx+1:curr_idx+steps*steps));
-    end
-    %p2 = ifft(fft(p1) ./ f3y);
-    %p2 = reshape(p2, [], 1);
+    p2 = ifft(fft(p1) ./ f3y);
+    p2 = reshape(p2, [], 1);
     p3u = ifft(fft(p2) ./ f3z);
     % For v
-    for j = 0:steps*steps-1
-        curr_idx = j*steps;
-%         if sum(isnan(ifft(fft(F_old(curr_idx+1:curr_idx+steps, 1)) ./ f3x(curr_idx+1:curr_idx+steps)))) > 0
-%             fft(F_old(curr_idx+1:curr_idx+steps, 2))
-%             f3x(curr_idx+1:curr_idx+steps)
-%         end
-        p1(curr_idx+1:curr_idx+steps) = ifft(fft(F_old(curr_idx+1:curr_idx+steps, 1)) ./ f3x(curr_idx+1:curr_idx+steps));
-    end
+
+    p1 = ifft(fft(F_old(:, :, 2)) ./ f3x);
+    p1 = reshape(p1, steps*steps, []);
     
-    %#U3x\(L3x\F_old(:,1)); %#U3y\(L3y\p1);
-    for j = 0:steps-1
-        curr_idx = j*steps*steps;
-        p2(curr_idx+1:curr_idx+steps*steps) = ifft(fft(p1(curr_idx+1:curr_idx+steps*steps)) ./ f3y(curr_idx+1:curr_idx+steps*steps));
-    end
+    p2 = ifft(fft(p1) ./ f3y);
+    p2 = reshape(p2, [], 1);
     p3v = ifft(fft(p2) ./ f3z);
     %#p1 = U3x\(L3x\F_old(:,2));
     %#p2 = U3y\(L3y\p1);
     %#p3v = ifft(fft(p2) ./ f3z);
     
     % For u
-    d1 = U3x\(L3x\u_old);
-    d2 = U3y\(L3y\d1);
-    d3u = U3z\(L3z\d2);
+    
+    d1 = ifft(fft(reshape(u_old, size(f3x))) ./ f3x);
+    
+    d2 = ifft(fft(reshape(d1, size(f3y))) ./ f3y);
+    
+    d3u = ifft(fft(reshape(d2, size(f3z))) ./ f3z);
+    
     u_star = d3u + dt*p3u;
     % For v
-    d1 = U3x\(L3x\v_old);
-    d2 = U3y\(L3y\d1);
-    d3v = U3z\(L3z\d2);
+    d1 = ifft(fft(reshape(v_old, size(f3x))) ./ f3x);
+    
+    d2 = ifft(fft(reshape(d1, size(f3y))) ./ f3y);
+    
+    d3v = ifft(fft(reshape(d2, size(f3z))) ./ f3z);
     v_star = d3v + dt*p3v;
     F_star = F(u_star,v_star);
        
     % For u
-    b1 = U1x\(L1x\F_old(:,1));
-    b2 = U2x\(L2x\F_old(:,1));
+    b1 = ifft(fft(F_old(:, :, 1)) ./ f1x);
+    b2 = ifft(fft(F_old(:, :, 1)) ./ f2x);
     c2 = 9*b1-8*b2;
-    b3 = U1y\(L1y\c2);
-    b4 = U2y\(L2y\c2);
+    b3 = ifft(fft(reshape(c2, size(f1y))) ./ f1y);
+    b4 = ifft(fft(reshape(c2, size(f2y))) ./ f2y);
     c4u = 9*b3-8*b4;
     % For v
-    b1 = U1x\(L1x\F_old(:,2));
-    b2 = U2x\(L2x\F_old(:,2));
+    b1 = ifft(fft(F_old(:, :, 2)) ./ f1x);
+    b2 = ifft(fft(F_old(:, :, 2)) ./ f2x);
     c2 = 9*b1-8*b2;
-    b3 = U1y\(L1y\c2);
-    b4 = U2y\(L2y\c2);
+    b3 = ifft(fft(reshape(c2, size(f1y))) ./ f1y);
+    b4 = ifft(fft(reshape(c2, size(f2y))) ./ f2y);
     c4v = 9*b3-8*b4;
     
+    c4u = reshape(c4u, [], 1);
+    c4v = reshape(c4v, [], 1);
+    
     % For u
-    a1 = U1x\(L1x\u_old);
-    a2 = U2x\(L2x\u_old);
+    a1 = ifft(fft(reshape(u_old, size(f1x))) ./ f1x);
+    a2 = ifft(fft(reshape(u_old, size(f2x))) ./ f2x);
     c1 = 9*a1-8*a2;
-    a3 = U1y\(L1y\c1);
-    a4 = U2y\(L2y\c1);
+    a3 = ifft(fft(reshape(c1, size(f1y))) ./ f1y);
+    a4 = ifft(fft(reshape(c1, size(f2y))) ./ f2y);
     c3u = 9*a3-8*a4;
-    s1u = U1z\(L1z\(9*c3u+2*dt*c4u+dt*F_star(:,1)));
-    s2u = U2z\(L2z\(8*c3u+(3/2)*dt*c4u+0.5*dt*F_star(:,1)));
+    c3u = reshape(c3u, [], 1);
+    s1u = ifft(fft(9*c3u+2*dt*c4u+dt*F_star(:,1)) ./ f1z);
+    s2u = ifft(fft(8*c3u+(3/2)*dt*c4u+0.5*dt*F_star(:,1)) ./ f2z);
     u_old = s1u-s2u;
     % For v
-    a1 = U1x\(L1x\v_old);
-    a2 = U2x\(L2x\v_old);
+    a1 = ifft(fft(reshape(v_old, size(f1x))) ./ f1x);
+    a2 = ifft(fft(reshape(v_old, size(f2x))) ./ f2x);
     c1 = 9*a1-8*a2;
-    a3 = U1y\(L1y\c1);
-    a4 = U2y\(L2y\c1);
+    a3 = ifft(fft(reshape(c1, size(f1y))) ./ f1y);
+    a4 = ifft(fft(reshape(c1, size(f2y))) ./ f2y);
     c3v = 9*a3-8*a4;
-    s1v = U1z\(L1z\(9*c3v+2*dt*c4v+dt*F_star(:,2)));
-    s2v = U2z\(L2z\(8*c3v+(3/2)*dt*c4v+0.5*dt*F_star(:,2)));
+    c3v = reshape(c3v, [], 1);
+    s1v = ifft(fft(9*c3v+2*dt*c4v+dt*F_star(:,2)) ./ f1z);
+    s2v = ifft(fft(8*c3v+(3/2)*dt*c4v+0.5*dt*F_star(:,2)) ./ f2z);
     v_old = s1v-s2v;
 end
 u_soln = u_old;
