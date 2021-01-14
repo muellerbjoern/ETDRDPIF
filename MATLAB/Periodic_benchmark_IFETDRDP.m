@@ -79,6 +79,13 @@ Ax = Diff(1,1)*kron(I,kron(I,B)) + Adv(1,1)*kron(I,kron(I,C));
 Ay = Diff(1,1)*kron(I,kron(B,I)) + Adv(1,1)*kron(I,kron(C,I));
 Az = Diff(1,1)*kron(B,kron(I,I)) + Adv(1,1)*kron(C,kron(I,I));
 
+%#figure(100);
+%#spy(Ax);
+%#figure(101);
+%#spy(Ay);
+%#figure(102);
+%#spy(Az);
+
 %#Ax = Adv(1,1)*kron(I,kron(I,C));
 %#Ay = Adv(1,1)*kron(I,kron(C,I));
 %#Az = Adv(1,1)*kron(C,kron(I,I));
@@ -108,6 +115,11 @@ clear Ax Ay Az I Id B
 [L1x,U1x]=lu(A1x);
 [L1y,U1y]=lu(A1y);
 [L1z,U1z]=lu(A1z);
+
+figure(1);
+spy(L3z);
+figure(2);
+spy(U3z);
 
 tic
 for i = 2:tlen

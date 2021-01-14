@@ -24,7 +24,7 @@ c = 1.0;
 % create nodes
 %# Split interval into steps subintervals (i.e., steps+1 points, including the
 %# end of the interval
-x = linspace(0,square_len,steps+1); h = abs(x(1)-x(2)); 
+x = linspace(0,square_len,steps+1); h = abs(x(1)-x(2));
 %# Remove the very last point, i.e., the end of the interval, as it is the same
 %# as the very first (periodic boundary!)
 x = x(1:steps);
@@ -125,6 +125,7 @@ for i = 0:steps-1
     f3y(curr_idx+1 : curr_idx + steps*steps) = curr_arr;
 end
 [L3z,U3z]=lu(A3z);
+
 f3z = fft(full(A3z(:,1)));
 
 [L2x,U2x]=lu(A2x);
@@ -144,6 +145,7 @@ for i = 0:steps-1
     f2y(curr_idx+1 : curr_idx + steps*steps) = curr_arr;
 end
 [L2z,U2z]=lu(A2z);
+
 f2z = fft(full(A2z(:,1)));
 
 [L1x,U1x]=lu(A1x);
@@ -163,46 +165,55 @@ for i = 0:steps-1
     f1y(curr_idx+1 : curr_idx + steps*steps) = curr_arr;
 end
 [L1z,U1z]=lu(A1z);
+
 f1z = fft(full(A1z(:,1)));
 
+
+p1 = zeros(steps*steps*steps, 1);
+p2 = zeros(steps*steps*steps, 1);
+%f3x = reshape(f3x, steps, []);
+%f3y = reshape(f3y, steps*steps, []);
 tic
 for i = 2:tlen
   
     %#disp(i);
-     
-    F_old = F(u_old,v_old);
+    F_old = F(u_old, v_old);
+    %F_old = reshape(F(u_old,v_old), steps, [], 2);
     % For u
     %# TODO: Replace zeros by uninit (plugin!)
-    p1 = zeros(steps*steps*steps, 1);
+    
+%     p1 = ifft(fft(F_old(1:end:steps*(steps+1), 1)) ./ f3x);
+%     p1 = reshape(p1, steps*steps, []);
+    
     for j = 0:steps*steps-1
         curr_idx = j*steps;
-        if sum(isnan(ifft(fft(F_old(curr_idx+1:curr_idx+steps, 1)) ./ f3x(curr_idx+1:curr_idx+steps)))) > 0
-            fft(F_old(curr_idx+1:curr_idx+steps, 1))
-            f3x(curr_idx+1:curr_idx+steps)
-        end
+%         if sum(isnan(ifft(fft(F_old(curr_idx+1:curr_idx+steps, 1)) ./ f3x(curr_idx+1:curr_idx+steps)))) > 0
+%             fft(F_old(curr_idx+1:curr_idx+steps, 1))
+%             f3x(curr_idx+1:curr_idx+steps)
+%         end
         p1(curr_idx+1:curr_idx+steps) = ifft(fft(F_old(curr_idx+1:curr_idx+steps, 1)) ./ f3x(curr_idx+1:curr_idx+steps));
     end
     
     %#U3x\(L3x\F_old(:,1));
-    p2 = zeros(steps*steps*steps, 1); %#U3y\(L3y\p1);
+     %#U3y\(L3y\p1);
     for j = 0:steps-1
         curr_idx = j*steps*steps;
         p2(curr_idx+1:curr_idx+steps*steps) = ifft(fft(p1(curr_idx+1:curr_idx+steps*steps)) ./ f3y(curr_idx+1:curr_idx+steps*steps));
     end
+    %p2 = ifft(fft(p1) ./ f3y);
+    %p2 = reshape(p2, [], 1);
     p3u = ifft(fft(p2) ./ f3z);
     % For v
-        p1 = zeros(steps*steps*steps, 1);
     for j = 0:steps*steps-1
         curr_idx = j*steps;
-        if sum(isnan(ifft(fft(F_old(curr_idx+1:curr_idx+steps, 1)) ./ f3x(curr_idx+1:curr_idx+steps)))) > 0
-            fft(F_old(curr_idx+1:curr_idx+steps, 2))
-            f3x(curr_idx+1:curr_idx+steps)
-        end
+%         if sum(isnan(ifft(fft(F_old(curr_idx+1:curr_idx+steps, 1)) ./ f3x(curr_idx+1:curr_idx+steps)))) > 0
+%             fft(F_old(curr_idx+1:curr_idx+steps, 2))
+%             f3x(curr_idx+1:curr_idx+steps)
+%         end
         p1(curr_idx+1:curr_idx+steps) = ifft(fft(F_old(curr_idx+1:curr_idx+steps, 1)) ./ f3x(curr_idx+1:curr_idx+steps));
     end
     
-    %#U3x\(L3x\F_old(:,1));
-    p2 = zeros(steps*steps*steps, 1); %#U3y\(L3y\p1);
+    %#U3x\(L3x\F_old(:,1)); %#U3y\(L3y\p1);
     for j = 0:steps-1
         curr_idx = j*steps*steps;
         p2(curr_idx+1:curr_idx+steps*steps) = ifft(fft(p1(curr_idx+1:curr_idx+steps*steps)) ./ f3y(curr_idx+1:curr_idx+steps*steps));

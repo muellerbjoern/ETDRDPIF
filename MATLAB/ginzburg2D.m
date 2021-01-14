@@ -43,5 +43,5 @@ for n = 1:nmax
     v(ind) = 0; % High frequency removal --- de-aliasing
 end
 u=real(ifftn(v));
-%figure(1)
-%imagesc(u)
+figure(1)
+imagesc(u)
