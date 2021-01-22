@@ -84,7 +84,7 @@ set(gca,'XTick',[0 20 40 60 80 100 120 140 160 180 200]);
 set(gca,'YTick',[0 20 40 60 80 100 120 140 160 180 200]);
 set(gca,'FontWeight','bold');
 colorbar
-#print -deps2c ginzburgreal.eps
+print -deps2c ginzburgreal.eps
 
 figure(20)
 imagesc(x,y,imag(U),[-1,1])
@@ -97,7 +97,7 @@ set(gca,'XTick',[0 20 40 60 80 100 120 140 160 180 200]);
 set(gca,'YTick',[0 20 40 60 80 100 120 140 160 180 200]);
 set(gca,'FontWeight','bold');
 colorbar
-#print -deps2c ginzburgimag.eps
+print -deps2c ginzburgimag.eps
 
 % %****************function calls**************************************
 function Fr = F(u)
