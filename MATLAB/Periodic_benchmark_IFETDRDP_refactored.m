@@ -1,4 +1,4 @@
-function [runtime,u_soln,u_ex] = Schnakenberg_IFETDRDP(dt,steps,do_plot)
+function [runtime,u_soln,u_ex] = Periodic_benchmark_IFETDRDP_refactored(dt,steps,do_plot)
 
 % dt: time step. Default is 0.001
 % steps: number of spatial points in each coordinate direction. Default is 11
