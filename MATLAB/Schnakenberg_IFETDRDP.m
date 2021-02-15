@@ -72,7 +72,7 @@ C = spdiags([-r_adv*e 0*e r_adv*e], -1:1, steps, steps);
 C(1, steps) = -r_adv;
 C(steps, 1) = r_adv;
 
-[runtime, u_soln, v_soln] = solve_ETD(dt, tlen, steps, 3, 2, B, C, Diff, Adv, u_old, v_old, @F);
+[runtime, u_soln, v_soln] = solve_ETD(dt, tlen, steps, 3, 2, B, C, Diff, Adv, {u_old, v_old}, @F);
 
   Uex = (exp(-b-d)+exp(-c-d))*cos(sum(nodes, 2)-a);
   Vex = (b-c)*exp(-c-d)*cos(sum(nodes, 2)-a);
@@ -183,15 +183,15 @@ C(steps, 1) = r_adv;
   end
     
 
-function Fr = F(u,v)
- f1 = -b*u + v;
- f2 = -c*v;
+function Fr = F(u)
+ f1 = -b*u{1} + u{2};
+ f2 = -c*u{2};
  Fr = [f1 f2];
 end
 
 end
 
-function [runtime, u_soln, v_soln] = solve_ETD(dt, tlen, steps, dim, num_species, B, C, Diff, Adv, u_old, v_old, F)
+function [runtime, u_soln, v_soln] = solve_ETD(dt, tlen, steps, dim, num_species, B, C, Diff, Adv, u_old, F)
 
 %# TODO: Different matrices for different species!
 %# Currently treating diffusion and advection as constant across species
@@ -264,61 +264,44 @@ A3z = (Id_temp + dt*Az);
 
 clear Ax Ay Az I Id B
 
-L1 = cell(dim, 1);
-U1 = cell(dim, 1);
-L2 = cell(dim, 1);
-U2 = cell(dim, 1);
-L3 = cell(dim, 1);
-U3 = cell(dim, 1);
-
-for i_dim = 1:dim
-   [L1{i_dim}, U1{i_dim}] = lu(A1{i_dim});
-   [L2{i_dim}, U2{i_dim}] = lu(A2{i_dim});
-   [L3{i_dim}, U3{i_dim}] = lu(A3{i_dim});
-end
-
-[L3x,U3x]=lu(A3x);
-[L3y,U3y]=lu(A3y);
-[L3z,U3z]=lu(A3z);
-
-[L2x,U2x]=lu(A2x);
-[L2y,U2y]=lu(A2y);
-[L2z,U2z]=lu(A2z);
-
-[L1x,U1x]=lu(A1x);
-[L1y,U1y]=lu(A1y);
-[L1z,U1z]=lu(A1z);
-
-% figure(1);
-% spy(L3{3});
-% figure(2);
-% spy(U3{3});
+% Dimensionwise LU decomposition
+[L1, U1] = cellfun(@lu, A1, 'UniformOutput', false);
+[L2, U2] = cellfun(@lu, A2, 'UniformOutput', false);
+[L3, U3] = cellfun(@lu, A3, 'UniformOutput', false);
+% Equivalent to:
+% [L3x,U3x]=lu(A3x);
+% [L3y,U3y]=lu(A3y);
+% [L3z,U3z]=lu(A3z);
+% 
+% [L2x,U2x]=lu(A2x);
+% [L2y,U2y]=lu(A2y);
+% [L2z,U2z]=lu(A2z);
+% 
+% [L1x,U1x]=lu(A1x);
+% [L1y,U1y]=lu(A1y);
+% [L1z,U1z]=lu(A1z);
 
 tic
 for i = 2:tlen
   
     %#disp(i);
      
-    F_old = F(u_old,v_old);
+    F_old = F(u_old);
     
-    % TODO: Replace by more general formulation
-    all_u_old = cell(2);
-    all_u_old{1} = u_old;
-    all_u_old{2} = v_old;
-    
-    p = cell(num_species);
-    my_d = cell(num_species);
+    p = cell(num_species, 1);
+    my_d = cell(num_species, 1);
     for i_spec = 1:num_species
-        p{i_spec} = U3{1}\(L3{1}\F_old(:, i_spec));
-        my_d{i_spec} = U3{1}\(L3{1}\all_u_old{i_spec});
-        for i_dim = 2:dim
+        p{i_spec} = F_old(:, i_spec);
+        my_d{i_spec} = u_old{i_spec};
+        for i_dim = 1:dim
+            %# TODO: Aggregate RHS, might be faster due to BLAS routine?
             p{i_spec} = U3{i_dim}\(L3{i_dim}\p{i_spec});
             my_d{i_spec} = U3{i_dim}\(L3{i_dim}\my_d{i_spec});
         end
     end
     
-    all_u_star = cellfun(@plus, my_d, cellfun(@(x) x*dt, p, 'UniformOutput', false), 'UniformOutput', false);
-    F_star = F(all_u_star{1}, all_u_star{2});
+    u_star = cellfun(@plus, my_d, cellfun(@(x) x*dt, p, 'UniformOutput', false), 'UniformOutput', false);
+    F_star = F(u_star);
 %     % For u
 %     p1 = U3x\(L3x\F_old(:,1));
 %     p2 = U3y\(L3y\p1);
@@ -340,44 +323,80 @@ for i = 2:tlen
 %     v_star = d3v + dt*p3v;
 %     F_star = F(u_star,v_star);
        
-    % For u
-    b1 = U1{1}\(L1{1}\F_old(:,1));
-    b2 = U2{1}\(L2{1}\F_old(:,1));
-    c2 = 9*b1-8*b2;
-    b3 = U1{2}\(L1{2}\c2);
-    b4 = U2{2}\(L2{2}\c2);
-    c4u = 9*b3-8*b4;
-    % For v
-    b1 = U1{1}\(L1{1}\F_old(:,2));
-    b2 = U2{1}\(L2{1}\F_old(:,2));
-    c2 = 9*b1-8*b2;
-    b3 = U1{2}\(L1{2}\c2);
-    b4 = U2{2}\(L2{2}\c2);
-    c4v = 9*b3-8*b4;
+    % Cell arrays to store intermediate results
     
-    % For u
-    a1 = U1{1}\(L1{1}\u_old);
-    a2 = U2{1}\(L2{1}\u_old);
-    c1 = 9*a1-8*a2;
-    a3 = U1{2}\(L1{2}\c1);
-    a4 = U2{2}\(L2{2}\c1);
-    c3u = 9*a3-8*a4;
-    s1u = U1{3}\(L1{3}\(9*c3u+2*dt*c4u+dt*F_star(:,1)));
-    s2u = U2{3}\(L2{3}\(8*c3u+(3/2)*dt*c4u+0.5*dt*F_star(:,1)));
-    u_old = s1u-s2u;
-    % For v
-    a1 = U1{1}\(L1{1}\v_old);
-    a2 = U2{1}\(L2{1}\v_old);
-    c1 = 9*a1-8*a2;
-    a3 = U1{2}\(L1{2}\c1);
-    a4 = U2{2}\(L2{2}\c1);
-    c3v = 9*a3-8*a4;
-    s1v = U1{3}\(L1{3}\(9*c3v+2*dt*c4v+dt*F_star(:,2)));
-    s2v = U2{3}\(L2{3}\(8*c3v+(3/2)*dt*c4v+0.5*dt*F_star(:,2)));
-    v_old = s1v-s2v;
+    % Contains intermediate RHS needed to compute c4 (F_old, c2, c4)
+    c4 = cell(num_species, 1);
+    % Contains intermediate RHS needed to compute c3 (u_old, c1, c3)
+    c3 = cell(num_species, 1);
+    
+    s1 = cell(num_species, 1);
+    s2 = cell(num_species, 1);
+    
+    for i_spec = 1:num_species
+        % Initialize RHS
+        c4{i_spec} = F_old(:, i_spec);
+        c3{i_spec} = u_old{i_spec};
+        for i_dim = 1:dim-1
+            % Solve for c4, linear system with F_old as RHS
+            b1 = U1{i_dim}\(L1{i_dim}\c4{i_spec});
+            b2 = U2{i_dim}\(L2{i_dim}\c4{i_spec});
+            c4{i_spec} = 9*b1-8*b2;
+            
+            % Solve for c3, linear system with u_old as RHS
+            a1 = U1{i_dim}\(L1{i_dim}\c3{i_spec});
+            a2 = U2{i_dim}\(L2{i_dim}\c3{i_spec});
+            c3{i_spec} = 9*a1-8*a2;
+        end
+        
+        % Summarize c3 and c4 to the summands of equation (19)
+        % (Asante-Asamani, 2020)
+        s1{i_spec} = U1{dim}\(L1{dim}\(9*c3{i_spec}+2*dt*c4{i_spec}+dt*F_star(:,i_spec)));
+        s2{i_spec} = U2{dim}\(L2{dim}\(8*c3{i_spec}+(3/2)*dt*c4{i_spec}+0.5*dt*F_star(:,i_spec)));
+        
+    end
+    
+    % Compute final value of U in equation (19)
+    u_old = cellfun(@minus, s1, s2, 'UniformOutput', false);
+
+%     % For u
+%     b1 = U1{1}\(L1{1}\F_old(:,1));
+%     b2 = U2{1}\(L2{1}\F_old(:,1));
+%     c2 = 9*b1-8*b2;
+%     b3 = U1{2}\(L1{2}\c2);
+%     b4 = U2{2}\(L2{2}\c2);
+%     c4u = 9*b3-8*b4;
+%     % For v
+%     b1 = U1{1}\(L1{1}\F_old(:,2));
+%     b2 = U2{1}\(L2{1}\F_old(:,2));
+%     c2 = 9*b1-8*b2;
+%     b3 = U1{2}\(L1{2}\c2);
+%     b4 = U2{2}\(L2{2}\c2);
+%     c4v = 9*b3-8*b4;
+%     
+%     %For u
+%     a1 = U1{1}\(L1{1}\u_old);
+%     a2 = U2{1}\(L2{1}\u_old);
+%     c1 = 9*a1-8*a2;
+%     a3 = U1{2}\(L1{2}\c1);
+%     a4 = U2{2}\(L2{2}\c1);
+%     c3u = 9*a3-8*a4;
+%     s1u = U1{3}\(L1{3}\(9*c3u+2*dt*c4u+dt*F_star(:,1)));
+%     s2u = U2{3}\(L2{3}\(8*c3u+(3/2)*dt*c4u+0.5*dt*F_star(:,1)));
+%     u_old = s1u-s2u;
+%     % For v
+%     a1 = U1{1}\(L1{1}\v_old);
+%     a2 = U2{1}\(L2{1}\v_old);
+%     c1 = 9*a1-8*a2;
+%     a3 = U1{2}\(L1{2}\c1);
+%     a4 = U2{2}\(L2{2}\c1);
+%     c3v = 9*a3-8*a4;
+%     s1v = U1{3}\(L1{3}\(9*c3v+2*dt*c4v+dt*F_star(:,2)));
+%     s2v = U2{3}\(L2{3}\(8*c3v+(3/2)*dt*c4v+0.5*dt*F_star(:,2)));
+%     v_old = s1v-s2v;
 end
-u_soln = u_old;
-v_soln = v_old;
+u_soln = u_old{1};
+v_soln = u_old{2};
 runtime = toc;
 
 end
