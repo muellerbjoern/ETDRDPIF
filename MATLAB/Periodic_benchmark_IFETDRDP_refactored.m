@@ -16,7 +16,7 @@ square_len = 2*pi;
 t = 0:dt:te; tlen = length(t);
 
 % Discretize in space
-[nodes, B, C] = discretize_periodic(steps, square_len);
+[nodes, B, C] = discretize_periodic(steps, square_len, dim);
 
 
 %% Model Paramters and initial conditions
@@ -47,6 +47,7 @@ Uex = (exp(-b-d)+exp(-c-d))*cos(sum(nodes, 2)-a);
 Vex = (b-c)*exp(-c-d)*cos(sum(nodes, 2)-a);
 
 Uex = reshape(Uex, steps, steps, steps);
+u_ex = Uex;
 Vex = reshape(Vex, steps, steps, steps);
 Usoln = reshape(u_soln,steps,steps,steps); 
 Vsoln = reshape(v_soln,steps,steps,steps);
@@ -67,7 +68,7 @@ end
 
 end
 
-function [nodes, B, C] = discretize_periodic(steps, square_len)
+function [nodes, B, C] = discretize_periodic(steps, square_len, dim)
 
     % create nodes
     %# Split interval into steps subintervals (i.e., steps+1 points, including the

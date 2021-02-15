@@ -17,7 +17,7 @@ toc
 for i = 1:3
     k = 0.005 / (2^i);
     N = 10*(2^i);
-    [time, u_old, Uex] = Schnakenberg_IFETDRDP(k, N, false);
+    [time, u_old, Uex] = Periodic_benchmark_IFETDRDP_refactored(k, N, false);
     
     times(i+1) = time;
 
@@ -29,7 +29,7 @@ for i = 1:3
     disp("Error");
     disp(errors(i+1));
     
-    [time, u_old, Uex] = Periodic_benchmark_IFETDRDP(k, N, false);
+    [time, u_old, Uex] = Periodic_benchmark_IFETDRDP_FFT(k, N, false);
     
     times(i+1) = time;
 
