@@ -68,11 +68,13 @@ for i = 2:tlen
         d{i_spec} = u_old{i_spec};
         for i_dim = 1:dim
             %# TODO: Aggregate RHS, might be faster due to BLAS routine?
-            p{i_spec} = U3{i_spec, i_dim}\(L3{i_spec, i_dim}\p{i_spec});
-            d{i_spec} = U3{i_spec, i_dim}\(L3{i_spec, i_dim}\d{i_spec});
+            %p{i_spec} = U3{i_spec, i_dim}\(L3{i_spec, i_dim}\p{i_spec});
+            %d{i_spec} = U3{i_spec, i_dim}\(L3{i_spec, i_dim}\d{i_spec});
+            p_d = U3{i_spec, i_dim}\(L3{i_spec, i_dim}\[p{i_spec} d{i_spec}]);
+            p{i_spec} = p_d(:, 1);
+            d{i_spec} = p_d(:, 2);
         end
     end
-    
     u_star = cellfun(@plus, d, cellfun(@(x) x*dt, p, 'UniformOutput', false), 'UniformOutput', false);
     F_star = F(u_star);
 %     % For u
@@ -112,13 +114,17 @@ for i = 2:tlen
         c3{i_spec} = u_old{i_spec};
         for i_dim = 1:dim-1
             % Solve for c4, linear system with F_old as RHS
-            b1 = U1{i_spec, i_dim}\(L1{i_spec, i_dim}\c4{i_spec});
-            b2 = U2{i_spec, i_dim}\(L2{i_spec, i_dim}\c4{i_spec});
+            a1_b1 = U1{i_spec, i_dim}\(L1{i_spec, i_dim}\[c3{i_spec} c4{i_spec}]);
+            a1 = a1_b1(:, 1);
+            b1 = a1_b1(:, 2);
+            a2_b2 = U2{i_spec, i_dim}\(L2{i_spec, i_dim}\[c3{i_spec} c4{i_spec}]);
+            a2 = a2_b2(:, 1);
+            b2 = a2_b2(:, 2);
             c4{i_spec} = 9*b1-8*b2;
             
             % Solve for c3, linear system with u_old as RHS
-            a1 = U1{i_spec, i_dim}\(L1{i_spec, i_dim}\c3{i_spec});
-            a2 = U2{i_spec, i_dim}\(L2{i_spec, i_dim}\c3{i_spec});
+            %a1 = U1{i_spec, i_dim}\(L1{i_spec, i_dim}\c3{i_spec});
+            %a2 = U2{i_spec, i_dim}\(L2{i_spec, i_dim}\c3{i_spec});
             c3{i_spec} = 9*a1-8*a2;
         end
         
