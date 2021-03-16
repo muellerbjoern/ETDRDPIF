@@ -1,4 +1,6 @@
-function [x, nodes, B, C] = discretize_periodic(steps, square_len, dim)
+function [x, steps, nodes, A] = discretize_periodic(steps, square_len, Diff, Adv)
+
+    dim = size(Adv, 2);
 
     % create nodes
     %# Split interval into steps subintervals (i.e., steps+1 points, including the
@@ -32,4 +34,6 @@ function [x, nodes, B, C] = discretize_periodic(steps, square_len, dim)
     C = spdiags([-r_adv*e 0*e r_adv*e], -1:1, steps, steps);
     C(1, steps) = -r_adv;
     C(steps, 1) = r_adv;
+    
+    A = set_dimension(B, C, Diff, Adv);
 end

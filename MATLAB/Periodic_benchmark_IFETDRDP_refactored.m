@@ -12,12 +12,6 @@ num_species = 2;
 te = 1.0;
 square_len = 2*pi;
 
-% Discretize time interval
-t = 0:dt:te; tlen = length(t);
-
-% Discretize in space
-[x, nodes, B, C] = discretize_periodic(steps, square_len, dim);
-
 
 %% Model Paramters and initial conditions
 a = 3.0; 
@@ -30,6 +24,12 @@ Diff = d/3.0*ones(num_species, dim);
 b = 100.0;
 c = 1.0;
 
+% Discretize time interval
+t = 0:dt:te; tlen = length(t);
+
+% Discretize in space
+[x, steps, nodes, A] = discretize_periodic(steps, square_len, Diff, Adv);
+
 %# Both species treated separately!
 %# Possible due to assumption of no coupling in diffusive term
 % initial condition for u
@@ -38,7 +38,7 @@ u_old = 2*cos(sum(nodes, 2));
 v_old = (b-c)*cos(sum(nodes,2));
 u_old = {u_old, v_old};
 
-[runtime, soln] = solve_ETD(dt, tlen, B, C, Diff, Adv, u_old, @F);
+[runtime, soln] = solve_ETD(dt, tlen, steps, A, u_old, @F);
 
 u_soln = soln{1};
 v_soln = soln{2};

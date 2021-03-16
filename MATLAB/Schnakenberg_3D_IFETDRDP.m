@@ -13,18 +13,6 @@ num_species = 2;
 te = .75;
 square_len = 1.0;
 
-% Discretize time interval
-t = 0:dt:te; tlen = length(t);
-
-% Discretize in space
-[x, nodes, B, C] = discretize_Neumann(steps, square_len, dim);
-
-% Number of points may be different from initial value of steps
-% Steps determines number of sub-intervals that the interval in
-% each dimension is split into!
-% Dirichlet allows removing both end points, Neumann requires both
-steps = size(B, 1);
-
 
 %% Model Paramters and initial conditions
 a1 = .01;
@@ -44,6 +32,17 @@ b = .7695;
 gamma = 100;
 Lambda = square_len;
 
+% Discretize time interval
+t = 0:dt:te; tlen = length(t);
+
+% Discretize in space
+% Number of points may be different from initial value of steps
+% Steps determines number of sub-intervals that the interval in
+% each dimension is split into!
+% Dirichlet allows removing both end points, Neumann requires both
+[x, steps, nodes, A] = discretize_Neumann(steps, square_len, Diff, Adv);
+
+
 %# Both species treated separately!
 %# Possible due to assumption of no coupling in diffusive term
 % initial condition for u
@@ -52,7 +51,7 @@ u_old = a+b+1e-3*exp(-100*((nodes(:, 1)-Lambda/3).^2 + (nodes(:, 2)-Lambda/2).^2
 v_old = ones(size(nodes, 1), 1) * b/((a+b)^2);
 u_old = {u_old, v_old};
 
-[runtime, soln] = solve_ETD(dt, tlen, B, C, Diff, Adv, u_old, @F);
+[runtime, soln] = solve_ETD(dt, tlen, steps, A, u_old, @F);
 
 u_soln = soln{1};
 v_soln = soln{2};
