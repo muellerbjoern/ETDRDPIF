@@ -1,5 +1,20 @@
 function [x, steps, nodes, A] = discretize_Neumann(steps, square_len, Diff, Adv)
 
+    % Diff and Adv must be (num_species x dim) matrices.
+    % This enables setting diffusion and advection per species and
+    % per dimension.
+    % Dependence on spatial dimension is mostly required for advection as 
+    % advection is usually defined along a certain spatial vector
+    % Different diffusion constants per species necessitate the ability
+    % of setting constants per species
+    % In order to keep it general, we allow both dependencies
+
+    if size(Diff) ~= size(Adv)
+        msg = ['Advection and Diffusion constant matrices need to be '...
+            '(number of species x spatial dimension)'];
+        error(msg);
+    end
+
     [num_species, dim] = size(Adv);
 
     % create nodes
@@ -16,63 +31,50 @@ function [x, steps, nodes, A] = discretize_Neumann(steps, square_len, Diff, Adv)
     nodes = cell2mat(nodes_cell);
 
     steps = steps + 1;
-    %% Block matrix Assembly
-    % 1D  matrix
-    e = ones(steps,1);r=1/h^2;
-    B = spdiags([-r*e 2*r*e -r*e], -1:1, steps, steps);
-    B(1,2) = -2*r;
-    B(steps,steps-1) = -2*r;
-
-    %# Advection matrix analogously
-    r_adv = 1/(2*h);
-    C = spdiags([-r_adv*e 0*e r_adv*e], -1:1, steps, steps);
-    % Homogeneous Neumann boundary is worked into B using ghost points
-    % Here: homogeneous Neumann interpreted as du/dn = 0
-    % (n being a non-zero normal vector to the boundary)
-    % Note: Different values make very little difference => What to do?
-    C(1, 2) = 0;
-    C(steps, steps-1) = 0;
     
-    % Diff and Adv must be (num_species x dim) matrices.
-% This enables setting diffusion and advection per species and
-% per dimension.
-% Dependence on spatial dimension is mostly required for advection as 
-% advection is usually defined along a certain spatial vector
-% Different diffusion constants per species necessitate the ability
-% of setting constants per species
-% In order to keep it general, we allow both dependencies
+    A = cell(num_species, dim);
 
-[num_species, dim] = size(Diff);
-if size(Diff) ~= size(Adv)
-    msg = ['Advection and Diffusion constant matrices need to be '...
-        '(number of species x spatial dimension)'];
-    error(msg);
-end
+    I = speye(steps);
+    
+    for i_dim = 1:dim
+        I_left = 1;
+        for ii = i_dim+1:dim
+            I_left = kron(I_left, I);
+        end
+        I_right = 1;
+        for ii = 2:i_dim
+           I_right = kron(I_right, I); 
+        end
+        for i_spec = 1:num_species
 
-steps = size(B, 1);
-if size(B) ~= size(C)
-    msg = ['Advection and Diffusion matrices (spatial discretization)'...
-        ' need to be (steps x steps)'];
-    error(msg);
-end
+            %% Block matrix Assembly
+            % 1D  matrix
+            e = ones(steps,1);r=1/h^2;
+            B = spdiags([-r*e 2*r*e -r*e], -1:1, steps, steps);
+%             B(1,2) = -2*r;
+%             B(steps,steps-1) = -2*r;
 
-A = cell(num_species, dim);
+            %# Advection matrix analogously
+            r_adv = 1/(2*h);
+            C = spdiags([-r_adv*e 0*e r_adv*e], -1:1, steps, steps);
+            % Homogeneous Neumann boundary is worked into B using ghost points
+            % Here: homogeneous Neumann interpreted as du/dn = 0
+            % (n being a non-zero normal vector to the boundary)
+            % Note: Different values make very little difference => What to do?
+%             C(1, 2) = 0;
+%             C(steps, steps-1) = 0;
 
-I = speye(steps);
-
-for i_dim = 1:dim
-    I_left = 1;
-    for ii = i_dim+1:dim
-        I_left = kron(I_left, I);
+            d = Diff(i_spec, i_dim);
+            a = Adv(i_spec, i_dim);
+            A_tmp = d*B + a*C;
+            
+            A_tmp(1, 1) = 2*d/h^2 - 2*a/h - a^2/d;
+            A_tmp(1, 2) = - 2*d/h^2;
+            A_tmp(steps, steps) = 2*d/h^2 + 2*a/h - a^2/d;
+            A_tmp(steps, steps-1) = A_tmp(1, 2);
+            A{i_spec, i_dim} = kron(I_left, kron(A_tmp, I_right));
+        end
     end
-    I_right = 1;
-    for ii = 2:i_dim
-       I_right = kron(I_right, I); 
-    end
-    for i_spec = 1:num_species
-        A{i_spec, i_dim} = Diff(i_spec,i_dim)*kron(I_left, kron(B, I_right)) +  Adv(i_spec,i_dim)*kron(I_left, kron(C, I_right));
-    end
-end
 
 % 3D equivalent:
 % Ax = Diff(1,1)*kron(I,kron(I,B)) + Adv(1,1)*kron(I,kron(I,C));
