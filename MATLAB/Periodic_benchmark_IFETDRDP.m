@@ -116,11 +116,6 @@ clear Ax Ay Az I Id B
 [L1y,U1y]=lu(A1y);
 [L1z,U1z]=lu(A1z);
 
-figure(1);
-spy(L3z);
-figure(2);
-spy(U3z);
-
 tic
 for i = 2:tlen
   

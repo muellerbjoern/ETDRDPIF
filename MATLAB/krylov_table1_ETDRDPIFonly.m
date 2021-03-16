@@ -5,16 +5,16 @@ times = zeros(4, 1);
 
 a = randi([0,1], [100000, 2]);
 
-tic;
-
-for i = 1:10000
-    aa = zeros([100000, 1]);
-end
-
-toc
+% tic;
+% 
+% for i = 1:10000
+%     aa = zeros([100000, 1]);
+% end
+% 
+% toc
 
 %for i = 0:3
-for i = 1:3
+for i = 3
     k = 0.005 / (2^i);
     N = 10*(2^i);
     [time, u_old, Uex] = Periodic_benchmark_IFETDRDP_refactored(k, N, false);
@@ -29,7 +29,7 @@ for i = 1:3
     disp("Error");
     disp(errors(i+1));
     
-    [time, u_old, Uex] = Periodic_benchmark_IFETDRDP_FFT(k, N, false);
+    [time, u_old, Uex] = Periodic_benchmark_IFETDRDP(k, N, false);
     
     times(i+1) = time;
 
