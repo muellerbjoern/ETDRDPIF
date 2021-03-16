@@ -1,4 +1,4 @@
-function [runtime,u_soln,u_ex] = Schnakenberg_3D_IFETDRDP(dt,steps,do_plot)
+function [runtime,u_soln,u_ex] = Schnakenberg_3D_IFETDRDP(te, dt,steps,do_plot)
 
 % dt: time step. Default is 0.001
 % steps: number of spatial points in each coordinate direction. Default is 11
@@ -10,7 +10,6 @@ dt = 0.0005;
 dim = 3;
 num_species = 2;
 
-te = .75;
 square_len = 1.0;
 
 
@@ -68,7 +67,7 @@ Vsoln = reshape(v_soln,steps,steps,steps);
 % disp(max(max(max(Usoln - Uex))));
 
 if do_plot
-plot_soln(Usoln, Vsoln, {x, x});
+plot_soln(Usoln, Vsoln, {x, x}, te);
 
 end
     
@@ -84,7 +83,7 @@ end
 
 
 
-function plot_soln(Usoln, Vsoln, grid)
+function plot_soln(Usoln, Vsoln, grid, te)
     
     x = grid{1};
     y = grid{2};
@@ -92,13 +91,13 @@ function plot_soln(Usoln, Vsoln, grid)
     Uplot = Usoln(:,:,1);
     Vplot = Vsoln(:,:,end);
     
-    for i_plot = [9 15] %[5 8 9 15 16 17]
-    figure(i_plot)
+    for i_plot = [15 16] %[5 8 9 15 16 17]
+    figure()
     % Transpose Usoln! See contourf documentation
     contourf(x,y,Usoln(:, :, i_plot)')
     xlabel('x')
     ylabel('y')
-    title("U")
+    title(["U" num2str(i_plot) num2str(te)]);
     colormap(jet(256));
     colorbar
     set(gca,'LineWidth', 1);
