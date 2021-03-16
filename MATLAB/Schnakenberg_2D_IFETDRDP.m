@@ -40,8 +40,11 @@ t = 0:dt:te; tlen = length(t);
 % Steps determines number of sub-intervals that the interval in
 % each dimension is split into!
 % Dirichlet allows removing both end points, Neumann requires both
+[xa, stepsa, nodesa, Aa] = discretize_Neumann_normalderivative(steps, square_len, Diff, Adv);
+
 [x, steps, nodes, A] = discretize_Neumann(steps, square_len, Diff, Adv);
 
+disp(isequal(A, Aa));
 
 
 cos_sum = zeros(size(nodes(:, 1)));
