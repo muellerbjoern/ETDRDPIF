@@ -64,13 +64,13 @@ function [x, steps, nodes, A] = discretize_Neumann(steps, square_len, Diff, Adv)
 %             C(1, 2) = 0;
 %             C(steps, steps-1) = 0;
 
-            d = Diff(i_spec, i_dim);
+            dd = Diff(i_spec, i_dim);
             a = Adv(i_spec, i_dim);
-            A_tmp = d*B + a*C;
+            A_tmp = dd*B + a*C;
             
-            A_tmp(1, 1) = 2*d/h^2 - 2*a/h - a^2/d;
-            A_tmp(1, 2) = - 2*d/h^2;
-            A_tmp(steps, steps) = 2*d/h^2 + 2*a/h - a^2/d;
+            A_tmp(1, 1) = 2*dd/h^2 - 2*a/h - a^2/dd;
+            A_tmp(1, 2) = - 2*dd/h^2;
+            A_tmp(steps, steps) = 2*dd/h^2 + 2*a/h - a^2/dd;
             A_tmp(steps, steps-1) = A_tmp(1, 2);
             A{i_spec, i_dim} = kron(I_left, kron(A_tmp, I_right));
         end
