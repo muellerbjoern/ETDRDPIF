@@ -41,6 +41,15 @@ t = 0:dt:te; tlen = length(t);
 % Dirichlet allows removing both end points, Neumann requires both
 [x, steps, nodes, A] = discretize_Neumann(steps, square_len, Diff, Adv);
 
+% Commutativity check; was true
+for ref = 1:num_species
+    for ref2 = 1:dim
+        for ref3 = 1:dim
+            isequal(A{ref, ref2} * A{ref, ref3}, A{ref, ref3} * A{ref, ref2})
+        end
+    end
+end
+
 
 %# Both species treated separately!
 %# Possible due to assumption of no coupling in diffusive term
