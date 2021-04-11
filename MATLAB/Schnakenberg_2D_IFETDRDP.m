@@ -1,16 +1,16 @@
-function [runtime,u_soln,u_ex] = Schnakenberg_2D_IFETDRDP(dt,steps,do_plot)
+function [runtime,u_soln,u_ex] = Schnakenberg_2D_IFETDRDP(te, dt, steps, do_plot)
 
 % dt: time step. Default is 0.001
 % steps: number of spatial points in each coordinate direction. Default is 11
 
 %# k is temporal discretization (dt);
 %# h is spatial discretization (steps);
-steps = 20;
-dt = 0.000125;
+% steps = 20;
+% dt = 0.000125;
 dim = 2;
 num_species = 2;
 
-te = .125;
+% te = .25;
 square_len = 1.0;
 
 
@@ -97,7 +97,7 @@ function plot_soln(Usoln, Vsoln, grid)
     Uplot = Usoln(:,:);
     Vplot = Vsoln(:,:);
     
-    figure(49)
+    figure()
     % Transpose Usoln! See contourf documentation
     surf(x,y, Uplot', 'FaceColor', 'interp')
     xlabel('x')
@@ -114,19 +114,19 @@ function plot_soln(Usoln, Vsoln, grid)
     %#set(gca,'YTick',[0 0.2 0.4 0.6 0.8 1]);
     %#print -depsc2 sliceu.eps
     
-    figure(50)
-    contourf(x,y,Vplot')
-    xlabel('x')
-    ylabel('y')
-    title("V")
-    colorbar
-    set(gca,'LineWidth', 1);
-    set(gca,'FontSize',10);
-    set(gca,'FontWeight','bold');
-    pbaspect(gca,[1 1 1])
-    %#set(gca,'XTick',[0 0.2 0.4 0.6 0.8 1]);
-    %#set(gca,'YTick',[0 0.2 0.4 0.6 0.8 1]);
-    %#print -depsc2 slicev.eps
+%     figure(50)
+%     contourf(x,y,Vplot')
+%     xlabel('x')
+%     ylabel('y')
+%     title("V")
+%     colorbar
+%     set(gca,'LineWidth', 1);
+%     set(gca,'FontSize',10);
+%     set(gca,'FontWeight','bold');
+%     pbaspect(gca,[1 1 1])
+%     %#set(gca,'XTick',[0 0.2 0.4 0.6 0.8 1]);
+%     %#set(gca,'YTick',[0 0.2 0.4 0.6 0.8 1]);
+%     %#print -depsc2 slicev.eps
     
     
 
