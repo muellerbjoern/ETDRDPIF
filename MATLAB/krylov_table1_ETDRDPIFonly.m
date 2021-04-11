@@ -14,32 +14,45 @@ a = randi([0,1], [100000, 2]);
 % toc
 
 %for i = 0:3
-for i = 3
-    k = 0.005 / (2^i);
-    N = 10*(2^i);
-    [time, u_old, Uex] = Periodic_benchmark_IFETDRDP_refactored(k, N, false);
+for i = 0:6
+    k =  0.005 / 2^(6-i);
+    N = 10*(2^10);
+%     k =  0.005 / 2^(3-i);
+%     N = 10*(2^5);
+    [time, u_old, Uex] = Periodic_benchmark_IFETDRDP_1D(k, N, false);
     
     times(i+1) = time;
 
-    Usoln = reshape(u_old,N,N,N);
-    errors(i+1) = max(max(max(abs(Usoln-Uex))));
+    Usoln = reshape(u_old,N, 1);
+    errors(i+1) = max(abs(Usoln-Uex));
     
-    disp("Time");
+%     Usoln = reshape(u_old,N, N);
+%     errors(i+1) = max(max(abs(Usoln-Uex)));
+    
+%     Usoln = reshape(u_old,N,N,N);
+%     errors(i+1) = max(max(max(abs(Usoln-Uex))));
+    
+    disp(["Time of iteration", i, ", k = ", k, ", N = ", N]);
     disp(times(i+1));
-    disp("Error");
+    disp(["Error of iteration", i]);
     disp(errors(i+1));
     
-    [time, u_old, Uex] = Periodic_benchmark_IFETDRDP(k, N, false);
+%     [time, u_old, Uex] = Periodic_benchmark_IFETDRDP(k, N, false);
+%    
+%     times(i+1) = time;
+% 
+%     Usoln = reshape(u_old,N,N,N);
+%     errors(i+1) = max(max(max(abs(Usoln-Uex))));
+%     
+%     disp("Time");
+%     disp(times(i+1));
+%     disp("Error");
+%     disp(errors(i+1)); 
     
-    times(i+1) = time;
+    
+end
 
-    Usoln = reshape(u_old,N,N,N);
-    errors(i+1) = max(max(max(abs(Usoln-Uex))));
-    
-    disp("Time");
-    disp(times(i+1));
-    disp("Error");
-    disp(errors(i+1)); 
-    
-    
+for i = 0:5
+   disp("Order");
+   disp(log2(errors(i+2)/errors(i+1)));
 end
