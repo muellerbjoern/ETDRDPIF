@@ -38,6 +38,9 @@ function [time,u_soln] = Krylov_Brusselator3DRDA(te, dt,steps)
      for p = 1:n
             for q = 1:m
                 for i = 1:m
+                    % TODO: Try cos, because it's compatible with boundary
+                    % condition
+                    %U(p,q,i) = 1.0+cos(2*pi*x(p))*cos(2*pi*y(q))*cos(2*pi*z(i));
                     U(p,q,i) = 1.0+sin(2*pi*x(p))*sin(2*pi*y(q))*sin(2*pi*z(i));
                     V(p,q,i) = 3.0;
                 end

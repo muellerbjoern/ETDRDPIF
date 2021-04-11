@@ -1,61 +1,66 @@
+sin
+>> krylov_table2_comparison
+Time of iteration 1, k = 0.005, N = 32
+    ETD-RDP-IF: 3.3863
+    Krylov-ETD: 13.7803
+ 
+maximal Difference ETD-RDP-IF - Krylov-ETD
+   0.001421466494715
 
-krylov_table2
-Time
-   3.505548000000000
+Error of iteration 1
+    ETD-RDP-IF: 2.0082e-05
+    Krylov-ETD: 0.0010936
+ 
+ 
+Time of iteration 2, k = 0.0025, N = 32
+    ETD-RDP-IF: 6.7287
+    Krylov-ETD: 25.7591
+ 
+maximal Difference ETD-RDP-IF - Krylov-ETD
+     3.448092921782830e-04
 
-  29.540538000000002
+Error of iteration 2
+    ETD-RDP-IF: 5.1434e-06
+    Krylov-ETD: 0.00026416
+ 
+ 
+Time of iteration 3, k = 0.00125, N = 32
+    ETD-RDP-IF: 13.4645
+    Krylov-ETD: 40.0739
+ 
+maximal Difference ETD-RDP-IF - Krylov-ETD
+     8.496842377381242e-05
 
-Error
-     7.705080040665280e-05
+Error of iteration 3
+    ETD-RDP-IF: 1.3029e-06
+    Krylov-ETD: 6.4967e-05
+ 
+ 
+Time of iteration 4, k = 0.000625, N = 32
+    ETD-RDP-IF: 26.8196
+    Krylov-ETD: 61.2403
+ 
+maximal Difference ETD-RDP-IF - Krylov-ETD
+     2.109285533347105e-05
 
-   0.004718393730606
-
-Difference
-   0.001421466494716
-
-Time
-   7.077491000000000
-
-  64.029369000000003
-
-Error
-     2.008184954505055e-05
-
-   0.001093578831203
-
-Difference
-     3.448092921942703e-04
-
-Time
-  13.771082000000000
-
-     1.578642360000000e+02
-
-Error
-     5.143394787410216e-06
-
-     2.641581113005387e-04
-
-Difference
-     8.496842378047376e-05
-
-Time
-  27.179065000000001
-
-     3.154626590000000e+02
-
-Error
-     1.302947435277702e-06
-
-     6.496695418700682e-05
-
-Difference
-     2.109285535212280e-05
+Error of iteration 4
+    ETD-RDP-IF: 3.2798e-07
+    Krylov-ETD: 1.6112e-05
+ 
+ 
+Time of iteration 5, k = 0.0003125, N = 32
+    ETD-RDP-IF: 53.7042
+    Krylov-ETD: 146.4632
+ 
+maximal Difference ETD-RDP-IF - Krylov-ETD
+     5.254839025692348e-06
 
 
 
 
 
+
+Various old values (all using cos instead of sin in initial condition):
 
 After setting correct subspace dimension:
 >> krylov_table2_comparison
@@ -110,3 +115,121 @@ Error
 
 Difference
      2.109285533347105e-05
+
+
+!!! Fixed error estimate...
+(||u_k - u_{k/2}||)Parag
+>> krylov_table2_comparison
+Time
+   3.491847000000000
+
+  13.846192000000000
+
+Difference
+   0.004142157533255
+
+Error
+     5.965995600476504e-05
+
+   0.003191705606862
+
+Time
+   6.943185000000000
+
+  26.048825000000001
+
+Difference
+     9.929940860802233e-04
+
+Error
+     1.470146743898226e-05
+
+     7.600748867617746e-04
+
+Time
+  13.865529000000000
+
+  39.522660999999999
+
+Difference
+     2.434572239757848e-04
+
+Error
+     3.642902143496940e-06
+
+     1.857815946557650e-04
+
+Time
+  27.532657000000000
+
+  59.599387000000000
+
+Difference
+     6.029476301216974e-05
+
+Error
+     9.062061856468517e-07
+
+     4.594315279060623e-05
+
+Time
+  54.967596999999998
+
+     1.369351840000000e+02
+
+Difference
+     1.500421547317998e-05
+
+
+Correct error estimate, using cos instead of sin in initial condition
+>> krylov_table2_comparison
+    "Time of iteration "    "1"    ", k = "    "0.005"    ", N = "    "32"
+
+ETD-RDP-IF: 3.5002
+Krylov-ETD: 14.0306
+maximal Difference ETD-RDP-IF - Krylov-ETD
+   0.004142157533255
+
+    "Error of iteration"    "1"
+
+ETD-RDP-IF: 5.966e-05
+Krylov-ETD: 0.0031917
+    "Time of iteration "    "2"    ", k = "    "0.0025"    ", N = "    "32"
+
+ETD-RDP-IF: 6.8617
+Krylov-ETD: 26.808
+maximal Difference ETD-RDP-IF - Krylov-ETD
+     9.929940860802233e-04
+
+    "Error of iteration"    "2"
+
+ETD-RDP-IF: 1.4701e-05
+Krylov-ETD: 0.00076007
+    "Time of iteration "    "3"    ", k = "    "0.00125"    ", N = "    "32"
+
+ETD-RDP-IF: 14.0831
+Krylov-ETD: 47.7518
+maximal Difference ETD-RDP-IF - Krylov-ETD
+     2.434572239757848e-04
+
+    "Error of iteration"    "3"
+
+ETD-RDP-IF: 3.6429e-06
+Krylov-ETD: 0.00018578
+    "Time of iteration "    "4"    ", k = "    "0.000625"    ", N = "    "32"
+
+ETD-RDP-IF: 32.6017
+Krylov-ETD: 81.9064
+maximal Difference ETD-RDP-IF - Krylov-ETD
+     6.029476301216974e-05
+
+    "Error of iteration"    "4"
+
+ETD-RDP-IF: 9.0621e-07
+Krylov-ETD: 4.5943e-05
+    "Time of iteration "    "5"    ", k = "    "0.0003125"    ", N = "    "32"
+
+ETD-RDP-IF: 55.6162
+Krylov-ETD: 155.4331
+maximal Difference ETD-RDP-IF - Krylov-ETD
+     1.500421547317998e-05

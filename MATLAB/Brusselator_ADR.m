@@ -37,13 +37,15 @@ t = 0:dt:te; tlen = length(t);
 % Steps determines number of sub-intervals that the interval in
 % each dimension is split into!
 % Dirichlet allows removing both end points, Neumann requires both
-[x, steps, nodes, A] = discretize_Neumann(steps, square_len, Diff, Adv);
+[x, steps, nodes, A] = discretize_Neumann_normalderivative(steps, square_len, Diff, Adv);
 
 
 %# Both species treated separately!
 %# Possible due to assumption of no coupling in diffusive term
 % initial condition for u
 u_old = 1 + sin(2*pi*nodes(:, 1)).*sin(2*pi*nodes(:, 2)).*sin(2*pi*nodes(:, 3));
+% TODO: Try with cos instead of sin for zero-flux boundary due to
+% compatibility
 % initial condition for v
 v_old = ones(size(nodes, 1), 1) * 3.0;
 u_old = {u_old, v_old};
