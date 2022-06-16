@@ -56,7 +56,7 @@ function [x, steps, nodes, A] = discretize_Neumann(steps, square_len, Diff, Adv)
 
             %# Advection matrix analogously
             r_adv = 1/(2*h);
-            C = spdiags([-r_adv*e 0*e r_adv*e], -1:1, steps, steps);
+            C = spdiags([r_adv*e 0*e -r_adv*e], -1:1, steps, steps);
             % Homogeneous Neumann boundary is worked into B using ghost points
             % Here: homogeneous Neumann interpreted as du/dn = 0
             % (n being a non-zero normal vector to the boundary)

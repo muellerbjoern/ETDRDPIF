@@ -18,6 +18,7 @@ function [x, steps, nodes, A] = discretize_periodic(steps, square_len, Diff, Adv
     [nodes_cell{1:dim}] = ndgrid(x);
     nodes_cell = cellfun(@(x) reshape(x,[], 1), nodes_cell, 'UniformOutput', false);
     nodes = cell2mat(nodes_cell);
+    
 
     %% Block matrix Assembly
     % 1D  matrix
@@ -31,9 +32,9 @@ function [x, steps, nodes, A] = discretize_periodic(steps, square_len, Diff, Adv
 
     %# Advection matrix analogously
     r_adv = 1/(2*h);
-    C = spdiags([-r_adv*e 0*e r_adv*e], -1:1, steps, steps);
-    C(1, steps) = -r_adv;
-    C(steps, 1) = r_adv;
+    C = spdiags([r_adv*e 0*e -r_adv*e], -1:1, steps, steps);
+    C(1, steps) = r_adv;
+    C(steps, 1) = -r_adv;
     
     A = set_dimension(B, C, Diff, Adv);
 end

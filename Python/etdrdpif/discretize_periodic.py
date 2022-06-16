@@ -36,9 +36,9 @@ def discretize_periodic(steps, square_len, Diff, Adv):
 
     # Advection matrix analogously
     r_adv = 1 / (2 * h)
-    C = sp.spdiags([-r_adv * e, r_adv * e], [-1,1], steps, steps, format='csc')
-    C[0, -1] = -r_adv
-    C[-1, 0] = r_adv
+    C = -sp.spdiags([-r_adv * e, r_adv * e], [-1,1], steps, steps, format='csc')
+    C[0, -1] = r_adv
+    C[-1, 0] = -r_adv
 
     A = adapt_dimension(B, C, Diff, Adv)
 
