@@ -1,12 +1,20 @@
+
 import time
 
 import numpy as np
 import scipy.sparse as sp
+from memory_profiler import profile
 from scipy.sparse import  linalg as splinalg
 
-def etd_solve(dt, tlen, steps, A, u_old, F):
+@profile
+def etd_solve(dt, tlen, steps, A, u_old, F, save_all_steps=False):
 
     dim, num_species = len(A), len(A[0])
+
+    if save_all_steps:
+        all_steps = np.zeros((tlen, num_species, *u_old[0].shape))
+        all_steps.fill(0)
+        all_steps[0] = np.array(u_old)
 
     # System matrices
     r1 = 1/3
@@ -68,6 +76,8 @@ def etd_solve(dt, tlen, steps, A, u_old, F):
     del A1, A2, A3
 
     start_time = time.time()
+
+    print("beginning iteration")
 
     for i in range(1, tlen):
 
@@ -147,6 +157,9 @@ def etd_solve(dt, tlen, steps, A, u_old, F):
 
         # Compute final value of U in equation (19)
         u_old = [x-y for (x, y) in zip(s1, s2)]
+        if save_all_steps:
+            for i_spec in range(num_species):
+                all_steps[i, i_spec] = u_old[i_spec]
 
     # %     % For u
     # %     b1 = U1{1}\(L1{1}\F_old(:,1));
@@ -186,4 +199,7 @@ def etd_solve(dt, tlen, steps, A, u_old, F):
     u_soln = u_old
     runtime = time.time() - start_time
 
-    return runtime, u_soln
+    if save_all_steps:
+        return runtime, all_steps
+    else:
+        return runtime, u_soln
