@@ -5,9 +5,8 @@ from memory_profiler import profile
 from etdrdpif.solve import etd_solve
 from etdrdpif.discretize_periodic import discretize_periodic, discretize_upwind_periodic
 
-# Benchmark problem 1D, 1 species
 
-@profile
+# Benchmark problem 1D, 1 species
 def benchmark_simple(dt, steps, out=False):
     # dt: time step. Default is 0.001
     # steps: number of spatial points in each coordinate direction. Default is 11

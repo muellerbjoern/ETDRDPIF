@@ -3,10 +3,9 @@ import time
 
 import numpy as np
 import scipy.sparse as sp
-from memory_profiler import profile
-from scipy.sparse import  linalg as splinalg
+from scipy.sparse import linalg as splinalg
 
-@profile
+
 def etd_solve(dt, tlen, steps, A, u_old, F, save_all_steps=False):
 
     dim, num_species = len(A), len(A[0])
