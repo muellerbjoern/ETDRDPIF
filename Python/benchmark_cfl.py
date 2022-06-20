@@ -80,21 +80,23 @@ def benchmark_simple(dt, steps, out=False):
 
 
 if __name__ == "__main__":
-    ks = 0.0002*np.logspace(-5, 4,num=12, base=2)
+    ks = 0.0002*np.logspace(-7, 4,num=12, base=2)
     hs_C_max = [2*k for k in ks]
     hs_C_low = [4*k for k in ks]
     hs_C_high = [1*k for k in ks]
     sweep_k = []
-    for k, h in zip(ks, hs_C_high):
+    for k, h in zip(ks, hs_C_low):
         print(k, int(round(1/h)))
         sweep_k.append(benchmark_simple(k, int(round(1/h)), out=True))
 
     print(list(zip(ks, sweep_k)))
     plt.plot(ks, sweep_k)
-    plt.xscale('log', basex=2)
-    plt.yscale('log', basey=2)
+    plt.xscale('log', base=2)
+    plt.yscale('log', base=2)
     plt.savefig("errors_C_low.png")
-    plt.show()
+    #plt.show()
 
-    # One result: [(6.25e-06, 0.02099183913608325), (1.1019890687450267e-05, 0.024743537856384692), (1.9430078522136498e-05, 0.029893367999905055), (3.42587746180031e-05, 0.03668396917696528), (6.040447222022238e-05, 0.042609682667666966), (0.00010650410894399628, 0.052708002161481506), (0.00018778618213234128, 0.061032608218402666), (0.0003311013119539244, 0.07060974966179123), (0.0005837920422725786, 0.0855021507678495), (0.001029331918407546, 0.10053618667904084), (0.00181490003551274, 0.12331839175002765), (0.0032, 0.1481004373642344)]
-
+    orders = []
+    for i in range(len(sweep_k)-1):
+        orders.append(np.log2(sweep_k[i+1]/sweep_k[i])/np.log2(ks[i+1]/ks[i]))
+    print(orders)
