@@ -56,11 +56,11 @@ def Bhatt_benchmark_1D(dt, steps):
 
     runtime, soln = etd_solve(dt, tlen, steps, A, u_old, F)
 
-    u_soln = soln[0];
-    v_soln = soln[1];
+    u_soln = soln[0]
+    v_soln = soln[1]
 
-    Uex = (np.exp(-b-d)+np.exp(-c-d))*np.cos(np.sum(nodes, axis=1)-a);
-    Vex = (b-c)*np.exp(-c-d)*np.cos(np.sum(nodes, axis=1)-a);
+    Uex = (np.exp(-b-d)+np.exp(-c-d))*np.cos(np.sum(nodes, axis=1)-a)
+    Vex = (b-c)*np.exp(-c-d)*np.cos(np.sum(nodes, axis=1)-a)
 
     Uex = np.reshape(Uex, (steps, 1))
     u_ex = Uex
@@ -68,7 +68,7 @@ def Bhatt_benchmark_1D(dt, steps):
     Usoln = np.reshape(u_soln, (steps, 1))
     Vsoln = np.reshape(v_soln, (steps, 1))
 
-    print(max(max(Usoln - Uex)));
+    print(max(max(Usoln - Uex)))
 
     #if do_plot:
     #    plot_soln(Usoln, Vsoln, Uex, Vex, {x, x})
