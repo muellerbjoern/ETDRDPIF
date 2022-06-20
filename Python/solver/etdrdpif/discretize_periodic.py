@@ -28,7 +28,7 @@ def discretize_periodic(steps, square_len, Diff, Adv):
     # Matrix for the 1D, 1 species case
     e = np.ones(steps)
     r = 1/h**2
-    B = sp.spdiags([-r*e, 2*r*e, -r*e], [-1, 0, 1], steps, steps, format='csc')
+    B = sp.spdiags([-r*e, 2*r*e, -r*e], [-1, 0, 1], steps, steps, format='lil')
 
     # Periodic boundary condition
     B[0, -1] = -r
@@ -36,7 +36,7 @@ def discretize_periodic(steps, square_len, Diff, Adv):
 
     # Advection matrix analogously
     r_adv = 1 / (2 * h)
-    C = -sp.spdiags([-r_adv * e, r_adv * e], [-1,1], steps, steps, format='csc')
+    C = -sp.spdiags([-r_adv * e, r_adv * e], [-1,1], steps, steps, format='lil')
     C[0, -1] = r_adv
     C[-1, 0] = -r_adv
 
@@ -70,7 +70,7 @@ def discretize_upwind_periodic(steps, square_len, Diff, Adv):
     # Matrix for the 1D, 1 species case
     e = np.ones(steps)
     r = 1 / h ** 2
-    B = sp.spdiags([-r * e, 2 * r * e, -r * e], [-1, 0, 1], steps, steps, format='csc')
+    B = sp.spdiags([-r * e, 2 * r * e, -r * e], [-1, 0, 1], steps, steps, format='lil')
 
     # Periodic boundary condition
     B[0, -1] = -r
@@ -83,11 +83,11 @@ def discretize_upwind_periodic(steps, square_len, Diff, Adv):
         Cs.append([])
         for i_spec in range(num_species):
             if Adv[i_spec][i_dim] >= 0:
-                C = sp.spdiags([r_adv * e, -r_adv * e], [0, 1], steps, steps, format='csc')
+                C = sp.spdiags([r_adv * e, -r_adv * e], [0, 1], steps, steps, format='lil')
                 # C[0, -1] = -r_adv
                 C[-1, 0] = -r_adv
             else:
-                C = sp.spdiags([r_adv * e, -r_adv * e], [-1, 0], steps, steps, format='csc')
+                C = sp.spdiags([r_adv * e, -r_adv * e], [-1, 0], steps, steps, format='lil')
                 C[0, -1] = r_adv
                 # C[-1, 0] = r_adv
 

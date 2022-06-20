@@ -24,7 +24,7 @@ def etd_solve(dt, tlen, steps, A, u_old, F, save_all_steps=False):
     for i_dim in range(dim):
         Id_temp = sp.kron(Id_temp, I)
 
-    # Stack identity matrices analogously to A
+    #i Stack identity matrices analogously to A
 
     Id = []
     for i_dim in range(dim):
@@ -40,11 +40,11 @@ def etd_solve(dt, tlen, steps, A, u_old, F, save_all_steps=False):
         A2.append([])
         A3.append([])
         for i_spec in range(num_species):
-            print(Id[i_dim][i_spec].shape)
-            print(A[i_dim][i_spec].shape)
-            A1[i_dim].append(Id[i_dim][i_spec] + r1*dt*A[i_dim][i_spec])
-            A2[i_dim].append(Id[i_dim][i_spec] + r2*dt*A[i_dim][i_spec])
-            A3[i_dim].append(Id[i_dim][i_spec] + dt*A[i_dim][i_spec])
+            #print(Id[i_dim][i_spec].shape)
+            #print(A[i_dim][i_spec].shape)
+            A1[i_dim].append((Id[i_dim][i_spec] + r1*dt*A[i_dim][i_spec]).tocsc())
+            A2[i_dim].append((Id[i_dim][i_spec] + r2*dt*A[i_dim][i_spec]).tocsc())
+            A3[i_dim].append((Id[i_dim][i_spec] + dt*A[i_dim][i_spec]).tocsc())
 
     # 3D equivalent
     # A1x = (Id_temp + r1*dt*Ax);
@@ -75,8 +75,6 @@ def etd_solve(dt, tlen, steps, A, u_old, F, save_all_steps=False):
     del A1, A2, A3
 
     start_time = time.time()
-
-    print("beginning iteration")
 
     for i in range(1, tlen):
 
