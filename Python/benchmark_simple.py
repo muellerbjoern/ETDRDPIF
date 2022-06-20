@@ -17,12 +17,12 @@ def benchmark_simple(dt, steps, out=False):
     dim = 1
     num_species = 1
 
-    te = 1
+    te = .1
     square_len = 1
 
 
     ## Model Paramters and initial conditions
-    a = -30.0
+    a = -120.0
     #d = 0.1
     d=0
     Adv = a*np.ones((num_species, dim))
@@ -33,28 +33,32 @@ def benchmark_simple(dt, steps, out=False):
     tlen = len(t)
 
     # Discretize in space
-    x, steps, nodes, A = discretize_upwind_periodic(steps, square_len, Diff, Adv)
+    x, steps, nodes, A = discretize_periodic(steps, square_len, Diff, Adv)
 
     #print(x, steps, nodes, A[0][0].todense())
+
+    def u0_func(x):
+        a = x - np.floor(x)
+        return np.logical_and(a >= .3, a <= .7)
 
     # Both species treated separately!
     # Possible due to assumption of no coupling in diffusive term
     # initial condition for u
     u_old = np.sin(2*np.pi*np.sum(nodes, axis=1))
     print(u_old)
-    # initial condition for v
-    u_old = [u_old]
+    u0 = u0_func(nodes[:,0])
+    u0 = [u0]
 
     def F(u):
         Fr = [np.zeros_like(u[0])]
         return Fr
 
-    runtime, soln = etd_solve(dt, tlen, steps, A, u_old, F, save_all_steps=True)
+    runtime, soln = etd_solve(dt, tlen, steps, A, u0, F, save_all_steps=False)
+    u_soln = soln#[-1, 0]
 
-
-    u_soln = soln[-1, 0]
     # TODO: Sign of the advection term
     Uex = np.sin(2*np.pi*(np.sum(nodes, axis=1)+a*te))*np.exp(-d*4*np.pi*np.pi*te)
+    Uex = u0_func(nodes+a*te)*np.exp(-d*4*np.pi*np.pi*te)
 
     Uex = np.reshape(Uex, (steps, 1))
     u_ex = Uex
@@ -63,13 +67,13 @@ def benchmark_simple(dt, steps, out=False):
     print(Usoln.shape)
 
     if out:
-        print(max(max(Usoln - Uex)))
 
-        plt.imshow(soln[:, -1, :])
-        plt.show()
+        #plt.imshow(soln[:, -1, :])
+        #plt.show()
 
         plt.plot(nodes, Uex)
         plt.plot(nodes, Usoln)
+        plt.savefig(f'{dt}_{1/steps}_{a}_{d}.eps')
         plt.show()
 
     return max(max(Usoln-Uex))
@@ -79,7 +83,7 @@ def benchmark_simple(dt, steps, out=False):
 
 
 if __name__ == "__main__":
-    benchmark_simple(0.0005, 1000, out=True)
+    benchmark_simple(0.00001, 50000, out=True)
     exit(0)
     sweep_k = []
     ks = 0.0002*np.logspace(-4, 4,num=20, base=2)

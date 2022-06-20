@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from memory_profiler import profile
 
 from etdrdpif.solve import etd_solve
 from etdrdpif.discretize_periodic import discretize_periodic, discretize_upwind_periodic
@@ -22,7 +21,7 @@ def benchmark_simple(dt, steps, out=False):
 
 
     ## Model Paramters and initial conditions
-    a = -120.0
+    a = -2.0
     #d = 0.1
     d=0
     Adv = a*np.ones((num_species, dim))
@@ -44,8 +43,6 @@ def benchmark_simple(dt, steps, out=False):
     # Both species treated separately!
     # Possible due to assumption of no coupling in diffusive term
     # initial condition for u
-    u_old = np.sin(2*np.pi*np.sum(nodes, axis=1))
-    print(u_old)
     u0 = u0_func(nodes[:,0])
     u0 = [u0]
 
@@ -64,7 +61,7 @@ def benchmark_simple(dt, steps, out=False):
     u_ex = Uex
     Usoln = np.reshape(u_soln, (steps, 1))
 
-    print(Usoln.shape)
+    #print(Usoln.shape)
 
     if out:
 
@@ -76,25 +73,28 @@ def benchmark_simple(dt, steps, out=False):
         plt.savefig(f'{dt}_{1/steps}_{a}_{d}.eps')
         plt.show()
 
-    return max(max(Usoln-Uex))
+    return np.linalg.norm((Usoln-Uex).flatten())/ np.linalg.norm(u0[0])
 
     #if do_plot:
     #    plot_soln(Usoln, Vsoln, Uex, Vex, {x, x})
 
 
 if __name__ == "__main__":
-    benchmark_simple(0.00001, 50000, out=True)
-    exit(0)
+    ks = 0.0002*np.logspace(-5, 4,num=12, base=2)
+    hs_C_max = [2*k for k in ks]
+    hs_C_low = [4*k for k in ks]
+    hs_C_high = [1*k for k in ks]
     sweep_k = []
-    ks = 0.0002*np.logspace(-4, 4,num=20, base=2)
-    ks = [0.0002/16]
-    for k in ks:
-        sweep_k.append(benchmark_simple(k, 1000))
+    for k, h in zip(ks, hs_C_high):
+        print(k, int(round(1/h)))
+        sweep_k.append(benchmark_simple(k, int(round(1/h)), out=True))
 
     print(list(zip(ks, sweep_k)))
-    # plt.plot(ks, sweep_k)
-    # plt.xscale('log')
-    # plt.yscale('log')
-    # plt.show()
+    plt.plot(ks, sweep_k)
+    plt.xscale('log', basex=2)
+    plt.yscale('log', basey=2)
+    plt.savefig("errors_C_low.png")
+    plt.show()
 
-    print("a")
+    # One result: [(6.25e-06, 0.02099183913608325), (1.1019890687450267e-05, 0.024743537856384692), (1.9430078522136498e-05, 0.029893367999905055), (3.42587746180031e-05, 0.03668396917696528), (6.040447222022238e-05, 0.042609682667666966), (0.00010650410894399628, 0.052708002161481506), (0.00018778618213234128, 0.061032608218402666), (0.0003311013119539244, 0.07060974966179123), (0.0005837920422725786, 0.0855021507678495), (0.001029331918407546, 0.10053618667904084), (0.00181490003551274, 0.12331839175002765), (0.0032, 0.1481004373642344)]
+
