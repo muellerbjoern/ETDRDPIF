@@ -1,3 +1,6 @@
+% Benchmark problem from Bhatt et al., 2018, reduced to single dimension,
+% but still 2 species!
+
 function [runtime,u_soln,u_ex] = Periodic_benchmark_IFETDRDP_1D(dt,steps,do_plot)
 
 % dt: time step. Default is 0.001
@@ -43,8 +46,8 @@ u_old = {u_old, v_old};
 u_soln = soln{1};
 v_soln = soln{2};
 
-Uex = (exp(-b-d)+exp(-c-d))*cos(sum(nodes, 2)-a);
-Vex = (b-c)*exp(-c-d)*cos(sum(nodes, 2)-a);
+Uex = (exp(-b-d)+exp(-c-d))*cos(sum(nodes, 2)+a);
+Vex = (b-c)*exp(-c-d)*cos(sum(nodes, 2)+a);
 
 Uex = reshape(Uex, steps, 1);
 u_ex = Uex;
@@ -55,7 +58,13 @@ Vsoln = reshape(v_soln,steps, 1);
 %disp(max(max(Usoln - Uex)));
 
 if do_plot
-plot_soln(Usoln, Vsoln, Uex, Vex, {x, x});
+    
+    plot(nodes, Uex);
+    hold on
+    plot(nodes, Usoln);
+    hold off
+    shg
+    %plot_soln(Usoln, Vsoln, Uex, Vex, {x, x});
 
 end
     

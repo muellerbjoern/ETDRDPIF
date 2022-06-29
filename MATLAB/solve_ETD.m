@@ -137,6 +137,7 @@ for i = 2:tlen
     
     % Compute final value of U in equation (19)
     u_old = cellfun(@minus, s1, s2, 'UniformOutput', false);
+    %disp(u_old{1});
 
 %     % For u
 %     b1 = U1{1}\(L1{1}\F_old(:,1));
