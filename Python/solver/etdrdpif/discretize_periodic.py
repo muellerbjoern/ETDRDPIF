@@ -98,6 +98,122 @@ def discretize_upwind_periodic(steps, square_len, Diff, Adv):
     return x, steps, nodes, A
 
 
+def discretize_upwind_Fromm_periodic(steps, square_len, Diff, Adv):
+    num_species, dim = Adv.shape
+
+    # create nodes
+    # Split interval into steps subintervals (i.e., steps+1 points, including the
+    # end of the interval
+    x = np.linspace(0, square_len, steps + 1)
+    h = abs(x[0] - x[1])
+
+    # Remove the very last point, i.e., the end of the interval, as it is the same
+    # as the very first (periodic boundary!)
+    x = x[:-1]
+
+    # Create nodes using ndgrid
+    # This is limited to a (hyper)square domain currently
+    # For other (hyper)rectangles, explicitly specify grid vectors for all
+    # dimensions
+    nodes = np.array(np.meshgrid(*([x] * dim), indexing='ij'))  # TODO: Check if this is really desired
+    nodes = nodes.reshape(dim, -1).T
+    nodes = nodes[:, ::-1]  # TODO: In Matlab this is the result, but do I want that in Python?
+
+    # Block matrix Assembly
+    # Matrix for the 1D, 1 species case
+    e = np.ones(steps)
+    r = 1 / h ** 2
+    B = sp.spdiags([-r * e, 2 * r * e, -r * e], [-1, 0, 1], steps, steps, format='lil')
+
+    # Periodic boundary condition
+    B[0, -1] = -r
+    B[-1, 0] = -r
+
+    # Advection matrix analogously
+    r_adv = 1 / h
+    Cs = []
+    for i_dim in range(dim):
+        Cs.append([])
+        for i_spec in range(num_species):
+            if Adv[i_spec][i_dim] >= 0:
+                C = r_adv*sp.spdiags([1/4*e, 3/4*e, -5/4*e, 1/4*e], [-1, 0, 1, 2], steps, steps, format='lil')
+                #C = sp.spdiags([r_adv * e, -r_adv * e], [0, 1], steps, steps, format='lil')
+                C[0, -1] = 1/4*r_adv
+                C[-1, 0] = -5/4*r_adv
+                C[-1, 1] = 1/4*r_adv
+                C[-2, 0] = 1/4*r_adv
+            else:
+                C = r_adv*sp.spdiags([-1/4*e, 5/4*e, -3/4*e, -1/4*e], [-2, -1, 0, 1], steps, steps, format='lil')
+                #C = sp.spdiags([r_adv * e, -r_adv * e], [-1, 0], steps, steps, format='lil')
+                C[0, -1] = 5/4*r_adv
+                C[0, -2] = -1/4*r_adv
+                C[1, -1] = -1/4*r_adv
+                C[-1, 0] = -1/4*r_adv
+
+            Cs[i_dim].append(C)
+
+    A = adapt_dimension(B, Cs, Diff, Adv)
+
+    return x, steps, nodes, A
+
+def discretize_upwind_thirdorder_periodic(steps, square_len, Diff, Adv):
+    num_species, dim = Adv.shape
+
+    # create nodes
+    # Split interval into steps subintervals (i.e., steps+1 points, including the
+    # end of the interval
+    x = np.linspace(0, square_len, steps + 1)
+    h = abs(x[0] - x[1])
+
+    # Remove the very last point, i.e., the end of the interval, as it is the same
+    # as the very first (periodic boundary!)
+    x = x[:-1]
+
+    # Create nodes using ndgrid
+    # This is limited to a (hyper)square domain currently
+    # For other (hyper)rectangles, explicitly specify grid vectors for all
+    # dimensions
+    nodes = np.array(np.meshgrid(*([x] * dim), indexing='ij'))  # TODO: Check if this is really desired
+    nodes = nodes.reshape(dim, -1).T
+    nodes = nodes[:, ::-1]  # TODO: In Matlab this is the result, but do I want that in Python?
+
+    # Block matrix Assembly
+    # Matrix for the 1D, 1 species case
+    e = np.ones(steps)
+    r = 1 / h ** 2
+    B = sp.spdiags([-r * e, 2 * r * e, -r * e], [-1, 0, 1], steps, steps, format='lil')
+
+    # Periodic boundary condition
+    B[0, -1] = -r
+    B[-1, 0] = -r
+
+    # Advection matrix analogously
+    r_adv = 1 / h
+    Cs = []
+    for i_dim in range(dim):
+        Cs.append([])
+        for i_spec in range(num_species):
+            if Adv[i_spec][i_dim] >= 0:
+                C = r_adv*sp.spdiags([1/3*e, 1/2*e, -1*e, 1/6*e], [-1, 0, 1, 2], steps, steps, format='lil')
+                #C = sp.spdiags([r_adv * e, -r_adv * e], [0, 1], steps, steps, format='lil')
+                C[0, -1] = 1/3*r_adv
+                C[-1, 0] = -1*r_adv
+                C[-1, 1] = 1/6*r_adv
+                C[-2, 0] = 1/6*r_adv
+            else:
+                C = r_adv*sp.spdiags([-1/6*e, 1*e, -1/2*e, -1/3*e], [-2, -1, 0, 1], steps, steps, format='lil')
+                #C = sp.spdiags([r_adv * e, -r_adv * e], [-1, 0], steps, steps, format='lil')
+                C[0, -1] = 1*r_adv
+                C[0, -2] = -1/6*r_adv
+                C[1, -1] = -1/6*r_adv
+                C[-1, 0] = -1/3*r_adv
+
+            Cs[i_dim].append(C)
+
+    A = adapt_dimension(B, Cs, Diff, Adv)
+
+    return x, steps, nodes, A
+
 def adapt_dimension(B, C, Diff, Adv):
     # Diff and Adv must be (num_species x dim) matrices.
     # This enables setting diffusion and advection per species and
