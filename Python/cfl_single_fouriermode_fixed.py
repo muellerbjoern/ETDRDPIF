@@ -90,32 +90,31 @@ if __name__ == "__main__":
     a = 100
     # ak/h = C => k = Ch/a
     h = 0.01/2
-    err_old = 2
+    err_old = np.inf
     for k_exp in range(12):
         k = 0.001*2**(-k_exp)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            _, err_max = benchmark_simple(k, int(round(1/h)), a=a, out=True)
-        order = np.log2(err_old/err_max)
-        print(f"h={h}, k={k}, C={a * k / h},\t error={err_max}, order={order}")
-        err_old = err_max
+            err_euclid, _ = benchmark_simple(k, int(round(1 / h)), a=a, out=True)
+        order = np.log2(err_old / err_euclid)
+        print(f"h={h}, k={k}, C={a * k / h},\t error={err_euclid}, order={order}")
+        err_old = err_euclid
 
     # Here we test convergence for different values of the CFL number
     print("Letting h and k approach 0 for fixed CFL number")
     a = 100
-    err_max = 2
     # ak/h = C => k = Ch/a
     for C in [0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1, 2, 3, 5, 10, 20, 100]:
-        err_old = 2
+        err_old = np.inf
         for h_exp in range(12):
             h = 0.01*2**(-h_exp)
             k = C*h/a
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 try:
-                    _, err_max = benchmark_simple(k, int(round(1/h)), a=a, out=True)
+                    err_euclid, _ = benchmark_simple(k, int(round(1 / h)), a=a, out=True)
                 except:
                     print("Error occurred")
-            order = np.log2(err_old/err_max)
-            print(f"C={a*k/h}, h={h}, k={k},\t error={err_max}, order={order}")
-            err_old = err_max
+            order = np.log2(err_old / err_euclid)
+            print(f"C={a*k/h}, h={h}, k={k},\t error={err_euclid}, order={order}")
+            err_old = err_euclid
