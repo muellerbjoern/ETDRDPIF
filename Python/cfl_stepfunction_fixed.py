@@ -104,18 +104,18 @@ if __name__ == "__main__":
     print("Letting h and k approach 0 for fixed CFL number")
     a = 100
     # ak/h = C => k = Ch/a
-    Cs = [0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1, 2, 3, 5, 10, 20, 100]
+    a_vals = [0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1, 2, 3, 5, 10, 20, 100, 200, 500, 1000]
     n = 8
-    errors_euclid = np.zeros((len(Cs), n))
-    errors_max = np.zeros((len(Cs), n))
-    orders_euclid = np.zeros((len(Cs), n-1))
-    runtimes = np.zeros((len(Cs), n))
-    params = np.zeros((len(Cs), n, 3))
-    for i, C in enumerate(Cs[::-1]):
+    errors_euclid = np.zeros((len(a_vals), n))
+    errors_max = np.zeros((len(a_vals), n))
+    orders_euclid = np.zeros((len(a_vals), n-1))
+    runtimes = np.zeros((len(a_vals), n))
+    params = np.zeros((len(a_vals), n, 3))
+    for i, a in enumerate(a_vals[::-1]):
         err_old = np.inf
         for j, h_exp in enumerate(range(n)):
             h = 0.01*2**(-h_exp)
-            k = C*h/a
+            k = h/20
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 try:
@@ -124,11 +124,11 @@ if __name__ == "__main__":
                     print("Error occurred")
                     print(e)
             order = np.log2(err_old / err_euclid)
-            print(f"C={a*k/h}, h={h}, k={k},\t error={err_euclid}, order={order}")
+            print(f"a={a}, C={a*k/h}, h={h}, k={k},\t error={err_euclid}, order={order}")
             errors_euclid[i, j] = err_euclid
             errors_max[i, j] = err_max
             runtimes[i, j] = runtime
-            params[i, j, 0] = C
+            params[i, j, 0] = a
             params[i, j, 1] = h
             params[i, j, 2] = k
             if j > 0:
@@ -141,5 +141,5 @@ if __name__ == "__main__":
     np.save("cfl_stepfunction_central_errors_max.npy", errors_max)
     np.save("cfl_stepfunction_central_orders_euclid.npy", orders_euclid)
     np.save("cfl_stepfunction_central_runtimes.npy", runtimes)
-    np.save("cfl_stepfunction_central_params_Chk.npy", params)
+    np.save("cfl_stepfunction_central_params_ahk.npy", params)
 
