@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import warnings
+import sys
 
 from etdrdpif.solve import etd_solve
 from etdrdpif.discretize_periodic import discretize_periodic, discretize_upwind_periodic, \
@@ -72,10 +73,11 @@ def benchmark_simple(dt, steps, a=1, out=False):
 
         plt.plot(nodes, Uex)
         plt.plot(nodes, Usoln)
-        plt.savefig(f'cfl_packet_a{a}_h{1/steps}_dt{dt}_te{te}.eps')
+        plt.savefig(f'cfl_packet_C{a*dt*steps}_a{a}_h{1/steps}_dt{dt}_te{te}.eps')
         plt.show()
+        plt.clf()
 
-    return np.linalg.norm((Usoln-Uex).flatten())/ np.linalg.norm(u0[0]), np.max((Usoln-Uex).flatten())
+    return runtime, np.linalg.norm((Usoln-Uex).flatten())/ np.linalg.norm(u0[0]), np.max((Usoln-Uex).flatten())
 
     #if do_plot:
     #    plot_soln(Usoln, Vsoln, Uex, Vex, {x, x})
@@ -94,26 +96,51 @@ if __name__ == "__main__":
         k = 0.001*2**(-k_exp)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            err_euclid, _ = benchmark_simple(k, int(round(1 / h)), a=a, out=True)
+            _, err_euclid, _ = benchmark_simple(k, int(round(1 / h)), a=a, out=True)
         order = np.log2(err_old / err_euclid)
         print(f"h={h}, k={k}, C={a * k / h},\t error={err_euclid}, order={order}")
         err_old = err_euclid
-
+    sys.stdout.flush()
     # Here we test convergence for different values of the CFL number
     print("Letting h and k approach 0 for fixed CFL number")
     a = 100
     # ak/h = C => k = Ch/a
-    for C in [0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1, 2, 3, 5, 10, 20, 100]:
+    Cs = [0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1, 2, 3, 5, 10, 20, 100]
+    n = 8
+    errors_euclid = np.zeros((len(Cs), n))
+    errors_max = np.zeros((len(Cs), n))
+    orders_euclid = np.zeros((len(Cs), n-1))
+    runtimes = np.zeros((len(Cs), n))
+    params = np.zeros((len(Cs), n, 3))
+    for i, C in enumerate(Cs[::-1]):
         err_old = np.inf
-        for h_exp in range(12):
+        for j, h_exp in enumerate(range(n)):
             h = 0.01*2**(-h_exp)
             k = C*h/a
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 try:
-                    err_euclid, _ = benchmark_simple(k, int(round(1 / h)), a=a, out=True)
-                except:
+                    runtime, err_euclid, err_max = benchmark_simple(k, int(round(1 / h)), a=a, out=False)
+                except Exception as e:
                     print("Error occurred")
+                    print(e)
             order = np.log2(err_old / err_euclid)
             print(f"C={a*k/h}, h={h}, k={k},\t error={err_euclid}, order={order}")
+            errors_euclid[i, j] = err_euclid
+            errors_max[i, j] = err_max
+            runtimes[i, j] = runtime
+            params[i, j, 0] = C
+            params[i, j, 1] = h
+            params[i, j, 2] = k
+            if j > 0:
+                orders_euclid[i, j-1] = order
             err_old = err_euclid
+            sys.stdout.flush()
+    sys.stdout.flush()
+    np.save("cfl_packet_central_errors_euclid.npy", errors_euclid)
+    np.save("cfl_packet_central_errors_max.npy", errors_max)
+    np.save("cfl_packet_central_orders_euclid.npy", orders_euclid)
+    np.save("cfl_packet_central_runtimes.npy", runtimes)
+    np.save("cfl_packet_central_params_Chk.npy", params)
+
+
