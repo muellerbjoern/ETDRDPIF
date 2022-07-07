@@ -16,6 +16,7 @@ function [time,u_soln] = Krylov_Periodic_benchmark(te, dt,steps)
     k = dt;% time step
     %x = x0:h:xn; % space discretization
     x = linspace(x0,xn,steps+1); h = abs(x(1)-x(2));
+    x = x(1:end-1);
     
     disp(x);
     disp(size(x));
@@ -30,6 +31,15 @@ function [time,u_soln] = Krylov_Periodic_benchmark(te, dt,steps)
     B = spdiags([ (2*d1+a1*h)*e -4*d1*e (2*d1-a1*h)*e],-1:1,n,n);%tridiagonal matrix
     B(1,n) = (2*d1+a1*h);
     B(n,1) = (2*d1-a1*h);
+    D = ones(1, 1)*2*d1;
+    A = -ones(1, 1)*2*a1;
+    [x2, steps2, nodes2, B2] = discretize_periodic(steps, xn, D, A);
+    B2 = -B2{1, 1}*h^2;
+    disp(B2);
+    disp(size(B));
+    disp(["B2", size(B2)]);
+    disp(B+B2);
+    disp(steps); disp(steps2); disp(x); disp(x2);
     B1 = spdiags([ (2*d2+a1*h)*e -4*d2*e (2*d2-a1*h)*e],-1:1,n,n);%tridiagonal matrix
     B1(1,n) = (2*d2+a1*h);
     B1(n,1) = (2*d2-a1*h);
@@ -52,13 +62,12 @@ function [time,u_soln] = Krylov_Periodic_benchmark(te, dt,steps)
     U_1 = U(:); V_1 = V(:);
     U_2 = U_1; V_2 = V_1;
     U_3 = U_1; V_3 = V_1; % nonlinear function setup
-    F = @(U1,V1) U1.^2.*V1-(a+1)*U1+b;
-    G = @(U1,V1) a*U1-U1.^2.*V1;
+    F = @(U1,V1) -b*U1 + V1;
+    G = @(U1,V1) -c*V1;
     T = t0:2*k:tn; M1 = length(T);
-    m1 = 10; % Krylov subspace dimension
-    tic;
+    m1 = 25; % Krylov subspace dimension    tic;
 for l = 2:M1
-    disp(l);
+    %disp(l);
     U_1 = expv( k, A1, ( U_1 + k*F(U_1, V_1)), 1.0e-1, m1);
     V_1 = expv( k, A2, ( V_1 + k*G(U_1,V_1)),1.0e-1,m1);
     
@@ -83,6 +92,9 @@ end
 time = toc;
 u_soln = sol1;
 
+%plot(u_soln);
+
+end
 
 %     CPUTIME(ii+1) = toc;
 %     U = reshape(sol1,[n n,n]);

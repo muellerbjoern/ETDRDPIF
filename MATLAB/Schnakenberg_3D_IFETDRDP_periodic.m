@@ -1,4 +1,4 @@
-function [runtime,u_soln,u_ex] = Schnakenberg_3D_IFETDRDP(te, dt,steps,do_plot)
+function [runtime,u_soln,u_ex] = Schnakenberg_3D_IFETDRDP_periodic(te, dt,steps,do_plot)
 
 % dt: time step. Default is 0.001
 % steps: number of spatial points in each coordinate direction. Default is 11
@@ -12,21 +12,21 @@ square_len = 1.0;
 
 
 %% Model Paramters and initial conditions
-a1 = .01;
-a2 = .01;
+a1 = 1.0;
+a2 = 1.0;
 Adv = zeros(num_species, dim);
 Adv(1, :) = -a1;
 Adv(2, :) = -a2;
 
 d1 = .05;
-d2 = 1.0;
+d2 = .01;
 Diff = zeros(num_species, dim);
 Diff(1, :) = d1;
 Diff(2, :) = d2;
 
-a = .1305;
-b = .7695;
-gamma = 100;
+a = 1.0;
+b = 0.9;
+gamma = 1.0;
 Lambda = square_len;
 
 % Discretize time interval
@@ -37,7 +37,7 @@ t = 0:dt:te; tlen = length(t);
 % Steps determines number of sub-intervals that the interval in
 % each dimension is split into!
 % Dirichlet allows removing both end points, Neumann requires both
-[x, steps, nodes, A] = discretize_Neumann_normalderivative(steps, square_len, Diff, Adv);
+[x, steps, nodes, A] = discretize_periodic(steps, square_len, Diff, Adv);
 
 % Commutativity check; was true
 % for ref = 1:num_species
@@ -52,9 +52,9 @@ t = 0:dt:te; tlen = length(t);
 %# Both species treated separately!
 %# Possible due to assumption of no coupling in diffusive term
 % initial condition for u
-u_old = a+b+1e-3*exp(-100*((nodes(:, 1)-Lambda/3).^2 + (nodes(:, 2)-Lambda/2).^2 + (nodes(:, 3)-Lambda/3).^2));
+u_old = 1.0 - exp(-10*((nodes(:, 1)-Lambda/2).^2 + (nodes(:, 2)-Lambda/2).^2 + (nodes(:, 3)-Lambda/2).^2));
 % initial condition for v
-v_old = ones(size(nodes, 1), 1) * b/((a+b)^2);
+v_old = u_old - 0.1;
 u_old = {u_old, v_old};
 
 [runtime, soln] = solve_ETD(dt, tlen, steps, A, u_old, @F);
@@ -73,10 +73,10 @@ Vsoln = reshape(v_soln,steps,steps,steps);
 
 % disp(max(max(max(Usoln - Uex))));
 
-if do_plot
-plot_soln(Usoln, Vsoln, {x, x}, te);
-
-end
+% if do_plot
+% plot_soln(Usoln, Vsoln, {x, x}, te);
+% 
+% end
     
 
 function Fr = F(u)
@@ -98,7 +98,7 @@ function plot_soln(Usoln, Vsoln, grid, te)
     Uplot = Usoln(:,:,1);
     Vplot = Vsoln(:,:,end);
     
-    for i_plot = [9 15 16] %[5 8 9 15 16 17]
+    for i_plot = [15 16] %[5 8 9 15 16 17]
     figure()
     % Transpose Usoln! See contourf documentation
     contourf(x,y,Usoln(:, :, i_plot)')

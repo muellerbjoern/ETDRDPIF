@@ -1,0 +1,55 @@
+krylov_table3_comparison
+Time of iteration 1, k = 0.005, N = 32
+    ETD-RDP-IF: 4.002
+    Krylov-ETD: 17.2393
+ 
+maximal Difference ETD-RDP-IF - Krylov-ETD
+     1.361798509171841e-04
+
+Error of iteration 1
+    ETD-RDP-IF: 4.6465e-05
+    Krylov-ETD: 8.2715e-05
+ 
+ 
+Time of iteration 2, k = 0.0025, N = 32
+    ETD-RDP-IF: 8.6672
+    Krylov-ETD: 40.3289
+ 
+maximal Difference ETD-RDP-IF - Krylov-ETD
+     3.441407228521598e-05
+
+Error of iteration 2
+    ETD-RDP-IF: 1.1687e-05
+    Krylov-ETD: 2.0659e-05
+ 
+ 
+Time of iteration 3, k = 0.00125, N = 32
+    ETD-RDP-IF: 17.3355
+    Krylov-ETD: 73.1365
+ 
+maximal Difference ETD-RDP-IF - Krylov-ETD
+     8.647685229679070e-06
+
+Error of iteration 3
+    ETD-RDP-IF: 2.9307e-06
+    Krylov-ETD: 5.1615e-06
+ 
+ 
+Time of iteration 4, k = 0.000625, N = 32
+    ETD-RDP-IF: 34.4879
+    Krylov-ETD: 125.0024
+ 
+maximal Difference ETD-RDP-IF - Krylov-ETD
+     2.167322918911196e-06
+
+Error of iteration 4
+    ETD-RDP-IF: 7.3377e-07
+    Krylov-ETD: 1.2899e-06
+ 
+ 
+Time of iteration 5, k = 0.0003125, N = 32
+    ETD-RDP-IF: 69.9802
+    Krylov-ETD: 216.9321
+ 
+maximal Difference ETD-RDP-IF - Krylov-ETD
+     5.424995772607133e-07

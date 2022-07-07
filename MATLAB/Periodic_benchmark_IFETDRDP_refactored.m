@@ -17,7 +17,7 @@ square_len = 2*pi;
 a = 3.0; 
 %#d = 0.1;
 d=1.0;
-Adv = a/3.0*ones(num_species, dim);
+Adv = -a/3.0*ones(num_species, dim);
 Diff = d/3.0*ones(num_species, dim);
 
 %#b = 0.1; 
