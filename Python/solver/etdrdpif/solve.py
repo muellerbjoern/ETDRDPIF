@@ -132,10 +132,10 @@ def etd_solve(dt, tlen, steps, A, u_old, F, save_all_steps=False):
             c3.append(u_old[i_spec])
             for i_dim in range(dim-1):
                 # Solve for c4, linear system with F_old as RHS
-                a1_b1 = LU1[i_dim][i_spec].solve(np.array([c3[i_spec][:, np.newaxis], c4[i_spec][:, np.newaxis]]))
+                a1_b1 = LU1[i_dim][i_spec].solve(np.vstack([c3[i_spec], c4[i_spec]]).T)
                 a1 = a1_b1[:, 0]
                 b1 = a1_b1[:, 1]
-                a2_b2 = LU2[i_dim][i_spec].solve(np.array([c3[i_spec][:, np.newaxis], c4[i_spec][:, np.newaxis]]))
+                a2_b2 = LU2[i_dim][i_spec].solve(np.vstack([c3[i_spec], c4[i_spec]]).T)
                 a2 = a2_b2[:, 0]
                 b2 = a2_b2[:, 1]
                 c4[i_spec] = 9*b1-8*b2
