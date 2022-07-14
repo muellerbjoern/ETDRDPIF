@@ -18,6 +18,8 @@ def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic
     if boundary == 'periodic':
         x = x[:-1]
 
+    print(x)
+
     y = x
     z = y
     # t = t0:k:tn # time discretization
@@ -56,10 +58,11 @@ def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic
             for i in range(n):
                 U[p, q, i], V[p, q, i] = u0(x[p], y[q], z[i])#2.0*np.cos(x[p] + y[q] + z[i])
                 # V[p, q, i] = (b-c)*np.cos(x[p] + y[q] + z[i])
+    print(U)
     U_1 = U.flatten(); V_1 = V.flatten()
     U_2 = U_1; V_2 = V_1
     U_3 = U_1; V_3 = V_1
-    M1 = int(np.floor((tn-t0)/(2*k)))
+    M1 = int(np.floor((tn-t0)/(2*k))) + 1 # TODO: If results differ from MATLAB, check M1 again
     # T = t0:2*k:tn; M1 = len(T)
     m1 = 10 # Krylov subspace dimension
     start = time.time()
