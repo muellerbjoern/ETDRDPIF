@@ -13,10 +13,12 @@ def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic
     a2 = Adv[1]
     nn = steps
     k = dt # timestep
-    x = np.linspace(x0,xn,steps+1)
-    h = abs(x[0]-x[1])
     if boundary == 'periodic':
+        x = np.linspace(x0,xn,steps+1)
         x = x[:-1]
+    if boundary == 'Neumann':
+        x = np.linspace(x0, xn, steps)
+    h = abs(x[0]-x[1])
 
     print(x)
 
@@ -32,6 +34,9 @@ def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic
     if boundary == 'periodic':
         B[0,-1] = (2*d1+a1*h)
         B[-1,1] = (2*d1-a1*h)
+    if boundary == 'Neumann':
+        B[0, 1] = 4*d1
+        B[-2, -1] = 4*d1
     # D = np.ones(1, 1)*2*d1
     # A = -np.ones(1, 1)*2*a1
     # [x2, steps2, nodes2, B2] = discretize_periodic(steps, xn, D, A);
@@ -45,6 +50,9 @@ def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic
     if boundary == 'periodic':
         B1[0,-1] = (2*d2+a2*h)
         B1[-1,0] = (2*d2-a2*h)
+    if boundary == 'Neumann':
+        B[0, 1] = 4*d2
+        B[-2, -1] = 4*d2
     A1 = 1/(2*h**2)*( sp.kron(B, sp.kron(sp.eye(n), sp.eye(n))) + sp.kron(sp.eye(n),
         sp.kron(B, sp.eye(n)))+ sp.kron(sp.eye(n), sp.kron(sp.eye(n),B)))
     A2 = 1/(2*h**2)*( sp.kron(B1, sp.kron(sp.eye(n), sp.eye(n))) + sp.kron(sp.eye(n),
