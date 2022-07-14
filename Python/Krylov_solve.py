@@ -4,7 +4,7 @@ import scipy.sparse as sp
 from expv import expv
 
 
-def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic'):
+def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic', **kwargs):
 
     x0 = 0
     xn = square_len
