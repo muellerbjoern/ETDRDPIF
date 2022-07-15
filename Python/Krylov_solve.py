@@ -17,10 +17,9 @@ def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic
         x = np.linspace(x0,xn,steps+1)
         x = x[:-1]
     if boundary == 'Neumann':
-        x = np.linspace(x0, xn, steps)
+        x = np.linspace(x0, xn, steps+1)
     h = abs(x[0]-x[1])
-
-    print(x)
+    # print(h)
 
     y = x
     z = y
@@ -33,10 +32,10 @@ def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic
     B = sp.spdiags([ (2*d1+a1*h)*e, -4*d1*e, (2*d1-a1*h)*e],[-1, 0, 1],n,n, format='lil') # tridiagonal matrix
     if boundary == 'periodic':
         B[0,-1] = (2*d1+a1*h)
-        B[-1,1] = (2*d1-a1*h)
+        B[-1,0] = (2*d1-a1*h)
     if boundary == 'Neumann':
         B[0, 1] = 4*d1
-        B[-2, -1] = 4*d1
+        B[-1, -2] = 4*d1
     # D = np.ones(1, 1)*2*d1
     # A = -np.ones(1, 1)*2*a1
     # [x2, steps2, nodes2, B2] = discretize_periodic(steps, xn, D, A);
@@ -52,7 +51,7 @@ def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic
         B1[-1,0] = (2*d2-a2*h)
     if boundary == 'Neumann':
         B[0, 1] = 4*d2
-        B[-2, -1] = 4*d2
+        B[-1, -2] = 4*d2
     A1 = 1/(2*h**2)*( sp.kron(B, sp.kron(sp.eye(n), sp.eye(n))) + sp.kron(sp.eye(n),
         sp.kron(B, sp.eye(n)))+ sp.kron(sp.eye(n), sp.kron(sp.eye(n),B)))
     A2 = 1/(2*h**2)*( sp.kron(B1, sp.kron(sp.eye(n), sp.eye(n))) + sp.kron(sp.eye(n),
@@ -66,14 +65,16 @@ def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic
             for i in range(n):
                 U[p, q, i], V[p, q, i] = u0(x[p], y[q], z[i])#2.0*np.cos(x[p] + y[q] + z[i])
                 # V[p, q, i] = (b-c)*np.cos(x[p] + y[q] + z[i])
-    print(U)
+    #print(U)
     U_1 = U.flatten(); V_1 = V.flatten()
     U_2 = U_1; V_2 = V_1
     U_3 = U_1; V_3 = V_1
-    M1 = int(np.floor((tn-t0)/(2*k))) + 1 # TODO: If results differ from MATLAB, check M1 again
+    M1 = int(np.floor((tn-t0)/(2*k))) +1 # TODO: If results differ from MATLAB, check M1 again
     # T = t0:2*k:tn; M1 = len(T)
     m1 = 10 # Krylov subspace dimension
     start = time.time()
+    #print(M1)
+    #print(k)
     for l in range(1, M1):
         F1, G1 = F(U_1, V_1)
         U_1 = expv( k, A1, ( U_1 + k*F1), 1.0e-7, m1)
