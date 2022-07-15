@@ -5,7 +5,6 @@ from expv import expv
 
 
 def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic', **kwargs):
-
     x0 = 0
     xn = square_len
     t0 = 0; tn = te; d1 = Diff[0] ;d2 = Diff[1]
@@ -50,8 +49,8 @@ def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic
         B1[0,-1] = (2*d2+a2*h)
         B1[-1,0] = (2*d2-a2*h)
     if boundary == 'Neumann':
-        B[0, 1] = 4*d2
-        B[-1, -2] = 4*d2
+        B1[0, 1] = 4*d2
+        B1[-1, -2] = 4*d2
     A1 = 1/(2*h**2)*( sp.kron(B, sp.kron(sp.eye(n), sp.eye(n))) + sp.kron(sp.eye(n),
         sp.kron(B, sp.eye(n)))+ sp.kron(sp.eye(n), sp.kron(sp.eye(n),B)))
     A2 = 1/(2*h**2)*( sp.kron(B1, sp.kron(sp.eye(n), sp.eye(n))) + sp.kron(sp.eye(n),
@@ -65,8 +64,7 @@ def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic
             for i in range(n):
                 U[p, q, i], V[p, q, i] = u0(x[p], y[q], z[i])#2.0*np.cos(x[p] + y[q] + z[i])
                 # V[p, q, i] = (b-c)*np.cos(x[p] + y[q] + z[i])
-    #print(U)
-    U_1 = U.flatten(); V_1 = V.flatten()
+    U_1 = U.flatten('F'); V_1 = V.flatten('F')
     U_2 = U_1; V_2 = V_1
     U_3 = U_1; V_3 = V_1
     M1 = int(np.floor((tn-t0)/(2*k))) +1 # TODO: If results differ from MATLAB, check M1 again
