@@ -19,7 +19,7 @@ function [time,u_soln] = Krylov_Periodic_benchmark(te, dt,steps)
     x = x(1:end-1);
     
     disp(x);
-    disp(size(x));
+    %disp(size(x));
     y = x;
     z = y;
     t = t0:k:tn; % time discretization
@@ -35,11 +35,11 @@ function [time,u_soln] = Krylov_Periodic_benchmark(te, dt,steps)
     A = -ones(1, 1)*2*a1;
     [x2, steps2, nodes2, B2] = discretize_periodic(steps, xn, D, A);
     B2 = -B2{1, 1}*h^2;
-    disp(B2);
-    disp(size(B));
-    disp(["B2", size(B2)]);
-    disp(B+B2);
-    disp(steps); disp(steps2); disp(x); disp(x2);
+    %disp(B2);
+    %disp(size(B));
+    %disp(["B2", size(B2)]);
+    %disp(B+B2);
+    %disp(steps); disp(steps2); disp(x); disp(x2);
     B1 = spdiags([ (2*d2+a1*h)*e -4*d2*e (2*d2-a1*h)*e],-1:1,n,n);%tridiagonal matrix
     B1(1,n) = (2*d2+a1*h);
     B1(n,1) = (2*d2-a1*h);
@@ -47,6 +47,7 @@ function [time,u_soln] = Krylov_Periodic_benchmark(te, dt,steps)
         kron(B, speye(n)))+ kron(speye(n), kron(speye(n),B)));
     A2 = 1/(2*h^2)*( kron(B1, kron(speye(n), speye(n))) + kron(speye(n),...
         kron(B1, speye(n)))+ kron(speye(n), kron(speye(n),B1)));
+    
     % %********************************************************************
     U = zeros(n,n,n);
     V = zeros(n,n,n);
@@ -59,6 +60,8 @@ function [time,u_soln] = Krylov_Periodic_benchmark(te, dt,steps)
                 end
             end
      end
+     
+    % disp(U);
     U_1 = U(:); V_1 = V(:);
     U_2 = U_1; V_2 = V_1;
     U_3 = U_1; V_3 = V_1; % nonlinear function setup
@@ -66,21 +69,32 @@ function [time,u_soln] = Krylov_Periodic_benchmark(te, dt,steps)
     G = @(U1,V1) -c*V1;
     T = t0:2*k:tn; M1 = length(T);
     m1 = 25; % Krylov subspace dimension    tic;
+    disp(M1);
+    disp(k);
 for l = 2:M1
     %disp(l);
-    U_1 = expv( k, A1, ( U_1 + k*F(U_1, V_1)), 1.0e-1, m1);
-    V_1 = expv( k, A2, ( V_1 + k*G(U_1,V_1)),1.0e-1,m1);
+    F1 = F(U_1, V_1);
+    G1 = G(U_1,V_1);
+    U_1 = expv( k, A1, ( U_1 + k*F1), 1.0e-1, m1);
+    V_1 = expv( k, A2, ( V_1 + k*G1),1.0e-1,m1);
     
-    U_1 = expv( k, A1, (U_1 + k*F(U_1, V_1)),1.0e-1,m1);
-    V_1 = expv( k, A2, ( V_1 + k*G(U_1,V_1)),1.0e-1,m1);
+    F1 = F(U_1, V_1);
+    G1 = G(U_1,V_1);
+    U_1 = expv( k, A1, (U_1 + k*F1),1.0e-1,m1);
+    V_1 = expv( k, A2, ( V_1 + k*G1),1.0e-1,m1);
     
 %   Extrapolation Scheme 
     
-    U_2 = expv( 2*k, A1, (U_2 + 2*k*F(U_2, V_2)),1.0e-1,m1);
-    V_2 = expv( 2*k, A2, (V_2 + 2*k*G(U_2,V_2)),1.0e-1,m1);
+    F2 = F(U_2,V_2);
+    G2 = G(U_2,V_2);
+    U_2 = expv( 2*k, A1, (U_2 + 2*k*F2),1.0e-1,m1);
+    V_2 = expv( 2*k, A2, (V_2 + 2*k*G2),1.0e-1,m1);
     
-    U_3 = expv( 2*k, A1, (U_3 + 2*k*F(U_3, V_3)),1.0e-1,m1);
-    V_3 = expv( 2*k, A2, (V_3 + 2*k*G(U_3,V_3)),1.0e-1,m1);
+    
+    F3 = F(U_3, V_3);
+    G3 = G(U_3,V_3);
+    U_3 = expv( 2*k, A1, (U_3 + 2*k*F3),1.0e-1,m1);
+    V_3 = expv( 2*k, A2, (V_3 + 2*k*G3),1.0e-1,m1);
     
     sol1 = 2*U_1-(U_2+U_3)/2;
     sol2 = 2*V_1-(V_2+V_3)/2;   % Extrapolation scheme

@@ -27,10 +27,14 @@ function [time,u_soln] = Krylov_Brusselator3DRDA(te, dt,steps)
     B1 = spdiags([ (2*d2+a1*h)*e -4*d2*e (2*d2-a1*h)*e],-1:1,n,n);%tridiagonal matrix
     B1(1,2) = 2*(2*d2);
     B1(n,n-1) = 2*(2*d2);
+    %save('B1', 'B1');
+    %save('B', 'B');
     A1 = 1/(2*h^2)*( kron(B, kron(speye(n), speye(n))) + kron(speye(n),...
         kron(B, speye(n)))+ kron(speye(n), kron(speye(n),B)));
     A2 = 1/(2*h^2)*( kron(B1, kron(speye(n), speye(n))) + kron(speye(n),...
         kron(B1, speye(n)))+ kron(speye(n), kron(speye(n),B1)));
+    %save('A1', 'A1');
+    %save('A2', 'A2');
     % %********************************************************************
     U = zeros(n,n,n);
     V = zeros(n,n,n);
@@ -47,6 +51,7 @@ function [time,u_soln] = Krylov_Brusselator3DRDA(te, dt,steps)
             end
      end
     U_1 = U(:); V_1 = V(:);
+    %disp(U_1);
     U_2 = U_1; V_2 = V_1;
     U_3 = U_1; V_3 = V_1; % nonlinear function setup
     F = @(U1,V1) U1.^2.*V1-(a+1)*U1+b;
@@ -55,23 +60,53 @@ function [time,u_soln] = Krylov_Brusselator3DRDA(te, dt,steps)
     m1 = 10; % Krylov subspace dimension
     tic;
 for l = 2:M1
+    %save(strcat('U1', num2str(l)), 'U_1');
+    %save(strcat('V1', num2str(l)), 'V_1');
     tol = 1.0e-7;
-    U_1 = my_expv( k, A1, ( U_1 + k*F(U_1, V_1)),tol,m1);
-    V_1 = my_expv( k, A2, ( V_1 + k*G(U_1,V_1)),tol,m1);
+    F1 = F(U_1, V_1);
+    G1 = G(U_1,V_1);
+    %save(strcat('F1', num2str(l)), 'F1');
+    %save(strcat('G1', num2str(l)), 'G1');
+    U_1 = expv( k, A1, ( U_1 + k*F1),tol,m1);
+    V_1 = expv( k, A2, ( V_1 + k*G1),tol,m1);
     
-    U_1 = my_expv( k, A1, (U_1 + k*F(U_1, V_1)),tol,m1);
-    V_1 = my_expv( k, A2, ( V_1 + k*G(U_1,V_1)),tol,m1);
+    %save(strcat('U1_2', num2str(l)), 'U_1');
+    %save(strcat('V1_2', num2str(l)), 'V_1');
+    
+    
+    F1 = F(U_1, V_1);
+    G1 = G(U_1, V_1);
+    %save(strcat('F1', num2str(l)), 'F1');
+    %save(strcat('G1', num2str(l)), 'G1');
+    U_1 = expv( k, A1, (U_1 + k*F1),tol,m1);
+    V_1 = expv( k, A2, ( V_1 + k*G1),tol,m1);
+    
+    %save(strcat('U1_3', num2str(l)), 'U_1');
+    %save(strcat('V1_3', num2str(l)), 'V_1');
     
 %   Extrapolation Scheme 
     
-    U_2 = my_expv( 2*k, A1, (U_2 + 2*k*F(U_2, V_2)),tol,m1);
-    V_2 = my_expv( 2*k, A2, (V_2 + 2*k*G(U_2,V_2)),tol,m1);
+    F2 = F(U_2, V_2);
+    G2 = G(U_2,V_2);
+    U_2 = expv( 2*k, A1, (U_2 + 2*k*F2),tol,m1);
+    V_2 = expv( 2*k, A2, (V_2 + 2*k*G2),tol,m1);
     
-    U_3 = my_expv( 2*k, A1, (U_3 + 2*k*F(U_3, V_3)),tol,m1);
-    V_3 = my_expv( 2*k, A2, (V_3 + 2*k*G(U_3,V_3)),tol,m1);
+    %save(strcat('U2', num2str(l)), 'U_2');
+    %save(strcat('V2', num2str(l)), 'V_2');
+    
+    F3 = F(U_3, V_3);
+    G3 = G(U_3,V_3);
+    U_3 = expv( 2*k, A1, (U_3 + 2*k*F3),tol,m1);
+    V_3 = expv( 2*k, A2, (V_3 + 2*k*G3),tol,m1);
+    
+    %save(strcat('U3', num2str(l)), 'U_3');
+    %save(strcat('V3', num2str(l)), 'V_3');
     
     sol1 = 2*U_1-(U_2+U_3)/2;
     sol2 = 2*V_1-(V_2+V_3)/2;   % Extrapolation scheme
+    
+    %save(strcat('sol1', num2str(l)), 'sol1');
+    %save(strcat('sol2', num2str(l)), 'sol2');
     
     U_1 = sol1;V_1 = sol2;U_2 = U_1;
     V_2 = V_1;U_3 = U_1; V_3 = V_1;
@@ -79,6 +114,8 @@ for l = 2:M1
 end
 time = toc;
 u_soln = sol1;
+%disp(min(min(min(sol1))));
+%disp(max(max(max(sol1))));
 
 
 %     CPUTIME(ii+1) = toc;
