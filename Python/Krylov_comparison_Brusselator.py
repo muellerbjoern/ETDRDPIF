@@ -19,6 +19,8 @@ def main(solver, discretization=None):
         if discretization is None:
             discretization = 'central'
 
+    experiment = f"Bhatt_Brusselator_{solver}_{discretization}"
+
     # Parameters of the specific experiment
     square_len = 1.0
     te = 1.0
@@ -36,8 +38,7 @@ def main(solver, discretization=None):
         return U1**2 * V1 - (A + 1) * U1 + b, A*U1 - U1**2 * V1
 
     a_vals = [0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1, 2, 3, 5, 10, 20, 100, 200, 500, 1000]
-    a_vals = [1.0]
-    n = 5
+    n = 3
     errors_euclid = np.zeros((len(a_vals), n))
     errors_max = np.zeros((len(a_vals), n))
     orders_euclid = np.zeros((len(a_vals), n - 1))
@@ -47,14 +48,15 @@ def main(solver, discretization=None):
     for i, a in enumerate(a_vals[::-1]):
         Adv = [a, a]
         steps = 32
-        k = 0.005
+        k = 0.01
         runtime, sol = solve(te, k, steps, square_len, Adv, Diff, F, u0, boundary=boundary,
                              discretization=discretization)
-        print(np.min(sol), np.max(sol))
-        matsoln = scipy.io.loadmat("../MATLAB/matsoln.mat")["usoln"]
-        matsoln = matsoln.flatten()
-        diff = sol - matsoln
-        diff_max = np.max(np.abs(diff))
+        np.save(f"{experiment}_soln_a{a}_h0.01_over_{2**0}", sol)
+        # print(np.min(sol), np.max(sol))
+        # matsoln = scipy.io.loadmat("../MATLAB/matsoln.mat")["usoln"]
+        # matsoln = matsoln.flatten()
+        # diff = sol - matsoln
+        # diff_max = np.max(np.abs(diff))
         runtimes[i, 0] = runtime
         params[i, 0] = np.array([a, 1.0/steps, k])
         err_old = np.inf
@@ -69,10 +71,11 @@ def main(solver, discretization=None):
                     print(k, steps)
                     runtime, sol_new = solve(te, k, steps, square_len, Adv, Diff, F, u0, boundary,
                                          discretization=discretization)
-                    runtime_etd, sol_etd = wrap_Krylov(te, k, steps, square_len, Adv, Diff, F, u0, boundary,
-                                         discretization=discretization)
-                    print("Difference", np.max(np.abs(sol_etd-sol_new)))
-                    print(np.min(sol_new), np.max(sol_new))
+                    np.save(f"{experiment}_soln_a{a}_h0.01_over_{2 ** h_exp}", sol_new)
+                    # runtime_etd, sol_etd = wrap_Krylov(te, k, steps, square_len, Adv, Diff, F, u0, boundary,
+                    #                      discretization=discretization)
+                    # print("Difference", np.max(np.abs(sol_etd-sol_new)))
+                    # print(np.min(sol_new), np.max(sol_new))
                 except Exception as e:
                     print("Error occurred")
                     print(e)
@@ -97,7 +100,6 @@ def main(solver, discretization=None):
             err_max_old = err_max
             sys.stdout.flush()
     sys.stdout.flush()
-    experiment = f"Bhatt_Brusselator_{solver}_{discretization}"
     np.save(f"{experiment}_errors_euclid", errors_euclid)
     np.save(f"{experiment}_errors_max.npy", errors_max)
     np.save(f"{experiment}_orders_euclid.npy", orders_euclid)
