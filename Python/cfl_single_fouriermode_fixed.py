@@ -77,7 +77,7 @@ def benchmark_simple(dt, steps, a=1, out=False):
         plt.show()
         plt.clf()
 
-    return runtime, np.linalg.norm((Usoln-Uex).flatten())/ np.linalg.norm(u0[0]), np.max((Usoln-Uex).flatten())
+    return runtime, np.linalg.norm((Usoln-Uex).flatten())/ np.linalg.norm(u0[0]), np.max(np.abs((Usoln-Uex).flatten()))
 
     #if do_plot:
     #    plot_soln(Usoln, Vsoln, Uex, Vex, {x, x})
