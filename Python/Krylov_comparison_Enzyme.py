@@ -8,7 +8,7 @@ import scipy.io
 from Krylov_solve import Krylov_solve
 from solver.etdrdpif.wrapper import wrap_Krylov, wrap_solve
 
-
+#(Asante real 2016)
 def main(solver, discretization=None):
 
     if solver == 'Krylov':
@@ -19,29 +19,24 @@ def main(solver, discretization=None):
         if discretization is None:
             discretization = 'central'
 
-    experiment = f"Bhatt_Schnakenberg_periodic_{solver}_{discretization}"
+    experiment = f"Enzymekin_{solver}_{discretization}"
 
     # Parameters of the specific experiment
     square_len = 1.0
     te = 1.0
-    Diff = [0.05, 0.01]
-    A = 1.0
+    Diff = [0.2, 0.2]
 
-    b = 0.9
-
-    gamma = 1.0
-
-    Lambda = square_len
-
-    boundary = 'periodic'
+    boundary = 'Dirichlet'
 
     def u0(x, y, z):
-        u = 1 - np.exp(-10*((x-Lambda/2)**2 + (y-Lambda/2)**2 + (z-Lambda/2)**2))
-        v = u + 0.1
+        u = np.ones_like(x)
+        v = np.ones_like(x)
         return u, v
 
     def F(U1, V1):
-        return gamma*(A - U1 + U1**2*V1), gamma*(b - U1**2*V1)
+        u = -U1/(1+U1)
+        v = -V1/(1+V1)
+        return u, v
 
     a_vals = [0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1, 2, 3, 5, 10, 20, 100, 200, 500, 1000]
     n = 6
