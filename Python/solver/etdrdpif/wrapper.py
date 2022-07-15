@@ -2,7 +2,7 @@ import numpy as np
 from etdrdpif.solve import etd_solve
 from etdrdpif.discretize_periodic import discretize_periodic, discretize_upwind_periodic, \
     discretize_upwind_Fromm_periodic, \
-    discretize_upwind_thirdorder_periodic, discretize_Neumann_normalderivative
+    discretize_upwind_thirdorder_periodic, discretize_Neumann_normalderivative, discretize_Dirichlet
 
 
 def wrap_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic', discretization='central'):
@@ -16,7 +16,7 @@ def wrap_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic',
     if boundary == 'Neumann':
         discretize = discretize_Neumann_normalderivative
     if boundary == 'Dirichlet':
-        raise NotImplementedError
+        discretize = discretize_Dirichlet
     if boundary == 'noflux':
         raise NotImplementedError
 

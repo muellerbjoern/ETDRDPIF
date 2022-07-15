@@ -19,6 +19,9 @@ def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic
         x = x[:-1]
     if boundary == 'Neumann':
         x = np.linspace(x0, xn, steps+1)
+    if boundary == 'Dirichlet':
+        x = np.linspace(x0, xn, steps+1)
+        x = x[1:-1]
     h = abs(x[0]-x[1])
     # print(h)
 
@@ -37,6 +40,8 @@ def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic
     if boundary == 'Neumann':
         B[0, 1] = 4*d1
         B[-1, -2] = 4*d1
+    if boundary == 'Dirichlet':
+        pass  # Explicitly do nothing
     # D = np.ones(1, 1)*2*d1
     # A = -np.ones(1, 1)*2*a1
     # [x2, steps2, nodes2, B2] = discretize_periodic(steps, xn, D, A);
@@ -53,6 +58,8 @@ def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic
     if boundary == 'Neumann':
         B1[0, 1] = 4*d2
         B1[-1, -2] = 4*d2
+    if boundary == 'Dirichlet':
+        pass  # Explicitly do nothing
 
     # B_mat = scipy.io.loadmat('../MATLAB/B.mat')['B']
     # B1_mat = scipy.io.loadmat('../MATLAB/B1.mat')['B1']
