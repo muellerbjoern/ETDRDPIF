@@ -32,7 +32,7 @@ def benchmark_simple(dt, steps, a=1, out=False):
 
     # Discretize time interval
     t = np.arange(0, te+dt, dt)
-    tlen = len(t)
+    tlen = int(np.floor(te/dt))
 
     # Discretize in space
     x, steps, nodes, A = discretize_periodic(steps, square_len, Diff, Adv)

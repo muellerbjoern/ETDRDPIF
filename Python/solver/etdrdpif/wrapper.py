@@ -2,12 +2,11 @@ import numpy as np
 from etdrdpif.solve import etd_solve
 from etdrdpif.discretize_periodic import discretize_periodic, discretize_upwind_periodic, \
     discretize_upwind_Fromm_periodic, \
-    discretize_upwind_thirdorder_periodic
+    discretize_upwind_thirdorder_periodic, discretize_Neumann_normalderivative
 
 
 def wrap_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic', discretization='central'):
-    t = np.arange(0, te + dt, dt)
-    tlen = len(t)
+    tlen = int(np.floor(te/dt)) + 1
 
     if boundary == 'periodic':
         discretize_dict = {'central': discretize_periodic,
@@ -15,7 +14,7 @@ def wrap_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic',
                            'thirdorder': discretize_upwind_thirdorder_periodic}
         discretize = discretize_dict[discretization]
     if boundary == 'Neumann':
-        raise NotImplementedError
+        discretize = discretize_Neumann_normalderivative
     if boundary == 'Dirichlet':
         raise NotImplementedError
     if boundary == 'noflux':
@@ -42,7 +41,9 @@ def wrap_Krylov(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic'
     Diff_full[1, :] = Diff[1]
 
     def u0_new(nodes):
-        return u0(nodes[:, 0], nodes[:, 1], nodes[:, 2])
+        u0_vec = u0(nodes[:, 0], nodes[:, 1], nodes[:, 2])
+        size = np.ones_like(nodes[:, 0])
+        return [u0_vec[0]*size, u0_vec[1]*size]
 
     def F_new(u):
         return list(F(u[0], u[1]))

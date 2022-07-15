@@ -76,6 +76,8 @@ def etd_solve(dt, tlen, steps, A, u_old, F, save_all_steps=False):
 
     start_time = time.time()
 
+    print(tlen)
+
     for i in range(1, tlen):
 
         F_old = F(u_old)
