@@ -214,6 +214,46 @@ def discretize_upwind_thirdorder_periodic(steps, square_len, Diff, Adv):
 
     return x, steps, nodes, A
 
+
+def discretize_Neumann_normalderivative(steps, square_len, Diff, Adv):
+
+    num_species, dim = Adv.shape
+
+    # create nodes
+    # Split interval into steps subintervals (i.e., steps+1 points, including the
+    # end of the interval
+    x = np.linspace(0,square_len,steps+1); h = abs(x[1]-x[0])
+
+
+    # Create nodes using ndgrid
+    # This is limited to a (hyper)square domain currently
+    # For other (hyper)rectangles, explicitly specify grid vectors for all
+    # dimensions
+    nodes = np.array(np.meshgrid(*([x] * dim), indexing='ij'))  # TODO: Check if this is really desired
+    nodes = nodes.reshape(dim, -1).T
+    nodes = nodes[:, ::-1]  # TODO: In Matlab this is the result, but do I want that in Python?
+
+    steps = steps + 1
+    # Block matrix Assembly
+    # 1D  matrix
+    e = np.ones(steps);r=1.0/(h**2)
+    B = sp.spdiags([-r*e, 2*r*e, -r*e], [-1, 0, 1], steps, steps, format='lil')
+    B[0,1] = -2*r
+    B[-1,-2] = -2*r
+
+    # Advection matrix analogously
+    r_adv = 1.0/(2*h)
+    C = sp.spdiags([r_adv*e, 0*e, -r_adv*e], [-1,0,1], steps, steps, format='lil')
+    # Homogeneous Neumann boundary is worked into B using ghost points
+    # Here: homogeneous Neumann interpreted as du/dn = 0
+    # (n being a non-zero normal vector to the boundary)
+    # Note: Different values make very little difference => What to do?
+    C[0, 1] = 0
+    C[-1, -2] = 0
+    A = adapt_dimension(B, C, Diff, Adv)
+
+    return x, steps, nodes, A
+
 def adapt_dimension(B, C, Diff, Adv):
     # Diff and Adv must be (num_species x dim) matrices.
     # This enables setting diffusion and advection per species and
