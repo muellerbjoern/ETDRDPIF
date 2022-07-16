@@ -32,11 +32,14 @@ def wrap_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic',
 
 def wrap_Krylov(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic', discretization='central'):
 
-    Adv_full = np.ones((2, 3))
+    dim = 3
+    num_species = 2
+
+    Adv_full = np.ones((num_species, dim))
     Adv_full[0, :] = -Adv[0]
     Adv_full[1, :] = -Adv[1]
 
-    Diff_full = np.ones((2, 3))
+    Diff_full = np.ones((num_species, dim))
     Diff_full[0, :] = Diff[0]
     Diff_full[1, :] = Diff[1]
 
