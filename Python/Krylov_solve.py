@@ -3,10 +3,17 @@ import time
 
 import scipy.io
 import scipy.sparse as sp
-from expv import expv
+from expv import expv as orig_expv
+from myexpv import expv as myexpv
 
 
-def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic', **kwargs):
+def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic', discretization='expv', **kwargs):
+
+    if discretization == 'myexpv':
+        expv = myexpv
+    else:
+        expv = orig_expv
+
     x0 = 0
     xn = square_len
     t0 = 0; tn = te; d1 = Diff[0] ;d2 = Diff[1]

@@ -12,7 +12,8 @@ from solver.etdrdpif.wrapper import wrap_Krylov, wrap_solve
 def main(solver, discretization=None):
 
     if solver == 'Krylov':
-        discretization = None
+        if discretization is None:
+            discretization = 'expv'
         solve = Krylov_solve
     else:
         solve = wrap_Krylov
@@ -45,12 +46,16 @@ def main(solver, discretization=None):
     orders_max = np.zeros((len(a_vals), n - 1))
     runtimes = np.zeros((len(a_vals), n+1))
     params = np.zeros((len(a_vals), n+1, 3))
-    for i, a in enumerate(a_vals[::-1]):
+    for i, a in enumerate(a_vals):
         Adv = [a, a]
         steps = 32
         k = 0.01
-        runtime, sol = solve(te, k, steps, square_len, Adv, Diff, F, u0, boundary=boundary,
-                             discretization=discretization)
+        try:
+            runtime, sol = solve(te, k, steps, square_len, Adv, Diff, F, u0, boundary=boundary,
+                                 discretization=discretization)
+        except Exception as e:
+            print("Error occurred")
+            continue
         np.save(f"{experiment}_soln_a{a}_h0.01_over_{2**0}", sol)
         # print(np.min(sol), np.max(sol))
         # matsoln = scipy.io.loadmat("../MATLAB/matsoln.mat")["usoln"]
@@ -79,7 +84,7 @@ def main(solver, discretization=None):
                 except Exception as e:
                     print("Error occurred")
                     print(e)
-                    continue
+                    break
             err = (sol_new - sol).flatten()
             sol = sol_new
             err_euclid = np.linalg.norm(err)

@@ -133,7 +133,6 @@ def expv(t, A, v, tol=1e-7, krylov_dim=30):
             # estimate new time-step
             tau = gamma * tau * (tau * tol / err_loc) ** r
             i += 1
-
         if i == maxiter:
             raise(RuntimeError("Number of iteration exceeded maxiter. "
                                "Requested tolerance might be too high."))
@@ -142,7 +141,8 @@ def expv(t, A, v, tol=1e-7, krylov_dim=30):
         t_k += tau
         tau = gamma * tau * (tau * tol / err_loc) ** r # estimate new time-step
         err_loc = max(err_loc, rndoff)
-
+        if tau < t_f/100:
+            raise RuntimeError("Unreasonably long runtime")
         h_m.fill(0.)
 
     return w
