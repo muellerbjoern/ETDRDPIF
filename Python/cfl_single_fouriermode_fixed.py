@@ -104,8 +104,8 @@ if __name__ == "__main__":
     print("Letting h and k approach 0 for fixed CFL number")
     a = 100
     # ak/h = C => k = Ch/a
-    a_vals = [0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1, 2, 3, 5, 10, 20, 100, 200, 500, 1000]
-    n = 8
+    a_vals = [0, 0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1, 2, 3, 5, 10, 20, 100, 200, 500, 1000]
+    n = 10
     errors_euclid = np.zeros((len(a_vals), n))
     errors_max = np.zeros((len(a_vals), n))
     orders_euclid = np.zeros((len(a_vals), n - 1))
@@ -119,7 +119,7 @@ if __name__ == "__main__":
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 try:
-                    runtime, err_euclid, err_max = benchmark_simple(k, int(round(1 / h)), a=a, out=False)
+                    runtime, err_euclid, err_max = benchmark_simple(k, int(round(1 / h)), a=a, out=True)
                 except Exception as e:
                     print("Error occurred")
                     print(e)
