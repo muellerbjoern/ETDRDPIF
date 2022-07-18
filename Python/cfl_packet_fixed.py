@@ -91,7 +91,7 @@ if __name__ == "__main__":
     # ak/h = C => k = Ch/a
     h = 0.01/2
     err_old = np.inf
-    for k_exp in range(0):
+    for k_exp in range(12):
         k = 0.001*2**(-k_exp)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     orders_euclid = np.zeros((len(a_vals), n - 1))
     runtimes = np.zeros((len(a_vals), n))
     params = np.zeros((len(a_vals), n, 3))
-    for i, a in enumerate(a_vals[7:]):
+    for i, a in enumerate(a_vals):
         err_old = np.inf
         for j, h_exp in enumerate(range(n)):
             h = 0.01*2**(-h_exp)
