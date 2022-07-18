@@ -49,7 +49,7 @@ def main(solver, discretization=None):
     # print(np.max(U_sol_Krylov-Uex))
     print(np.max(U_sol_rdp-Uex))
 
-    a_vals = [0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1, 2, 3, 5, 10, 20, 100, 200, 500, 1000]
+    a_vals = [0, 0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1, 2, 3, 5, 10, 20, 100, 200, 500, 1000]
     n = 5
     errors_euclid = np.zeros((len(a_vals), n))
     errors_max = np.zeros((len(a_vals), n))
@@ -57,7 +57,7 @@ def main(solver, discretization=None):
     orders_max = np.zeros((len(a_vals), n - 1))
     runtimes = np.zeros((len(a_vals), n))
     params = np.zeros((len(a_vals), n, 3))
-    for i, a in enumerate(a_vals[::-1]):
+    for i, a in enumerate(a_vals):
         err_old = np.inf
         err_max_old = np.inf
         Adv = [a/3.0, a/3.0]

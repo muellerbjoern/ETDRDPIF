@@ -44,7 +44,7 @@ def main(solver, discretization=None):
     def F(U1, V1):
         return gamma*(A - U1 + U1**2*V1), gamma*(b - U1**2*V1)
 
-    a_vals = [0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1, 2, 3, 5, 10, 20, 100, 200, 500, 1000]
+    a_vals = [0, 0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1, 2, 3, 5, 10, 20, 100, 200, 500, 1000]
     n = 6
     errors_euclid = np.zeros((len(a_vals), n))
     errors_max = np.zeros((len(a_vals), n))
