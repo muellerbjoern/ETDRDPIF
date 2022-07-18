@@ -31,8 +31,7 @@ def benchmark_simple(dt, steps, a=1, out=False):
     Diff = d*np.ones((num_species, dim))
 
     # Discretize time interval
-    t = np.arange(0, te+dt, dt)
-    tlen = int(np.floor(te/dt))
+    tlen = int(np.floor(te/dt)) + 1
 
     # Discretize in space
     x, steps, nodes, A = discretize_periodic(steps, square_len, Diff, Adv)
