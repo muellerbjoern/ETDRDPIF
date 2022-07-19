@@ -24,7 +24,7 @@ def expv(t, A, v, tol=1e-7, krylov_dim=30):
     k1 = 2; xm = 1/m; normv = np.linalg.norm(v); beta = normv;
     fact = (((m+1)/np.exp(1))**(m+1))*np.sqrt(2*np.pi*(m+1));
     t_new = (1/anorm)*((fact*tol)/(4*beta*anorm))**xm;
-    s = 10**(np.floor(np.log10(t_new))-1); t_new = np.ceil(t_new/s)*s;
+    #s = 10**(np.floor(np.log10(t_new))-1); #t_new = np.ceil(t_new/s)*s;
     sgn = np.sign(t); nstep = 0;
 
 

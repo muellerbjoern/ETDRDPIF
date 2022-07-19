@@ -56,23 +56,28 @@ def main(solver, discretization=None):
         Adv = [a, a]
         steps = 32
         k = 0.01
-        try:
-            runtime, sol = solve(te, k, steps, square_len, Adv, Diff, F, u0, boundary=boundary,
-                                 discretization=discretization)
-        except Exception as e:
-            print("Error occurred")
-            continue
-        np.save(f"{experiment}_soln_a{a}_h0.01_over_{2**0}", sol)
+        start = 0
+        while True:
+            try:
+                runtime, sol = solve(te, k, steps, square_len, Adv, Diff, F, u0, boundary=boundary,
+                                     discretization=discretization)
+            except Exception as e:
+                print("Error occurred", e)
+                k = k/2
+                start += 1
+            else:
+                break
+        np.save(f"{experiment}_soln_a{a}_h0.01_over_{2**start}", sol)
         # print(np.min(sol), np.max(sol))
         # matsoln = scipy.io.loadmat("../MATLAB/matsoln.mat")["usoln"]
         # matsoln = matsoln.flatten()
         # diff = sol - matsoln
         # diff_max = np.max(np.abs(diff))
-        runtimes[i, 0] = runtime
-        params[i, 0] = np.array([a, 1.0/steps, k])
+        runtimes[i, start] = runtime
+        params[i, start] = np.array([a, 1.0/steps, k])
         err_old = np.inf
         err_max_old = np.inf
-        for j, h_exp in enumerate(range(1, n)):
+        for j, h_exp in enumerate(range(start+1, n)):
             #steps = 10*2**h_exp
             k = k/2
             #k = 0.005/(2**h_exp)
@@ -98,15 +103,15 @@ def main(solver, discretization=None):
             order = np.log2(err_old / err_euclid)
             h = 1.0/steps
             print(f"a={a}, C={a*k/h}, h={h}, k={2*k},\t error={err_max}, order={order}")
-            errors_euclid[i, j] = err_euclid
-            errors_max[i, j] = err_max
-            runtimes[i, j+1] = runtime
-            params[i, j+1, 0] = a
-            params[i, j+1, 1] = h
-            params[i, j+1, 2] = k
+            errors_euclid[i, start+j] = err_euclid
+            errors_max[i, start+j] = err_max
+            runtimes[i, start+j+1] = runtime
+            params[i, start+j+1, 0] = a
+            params[i, start+j+1, 1] = h
+            params[i, start+j+1, 2] = k
             if j > 0:
-                orders_euclid[i, j-1] = order
-                orders_max[i, j-1] = np.log2(err_max_old/err_max)
+                orders_euclid[i, start+j-1] = order
+                orders_max[i, start+j-1] = np.log2(err_max_old/err_max)
             err_old = err_euclid
             err_max_old = err_max
             sys.stdout.flush()
