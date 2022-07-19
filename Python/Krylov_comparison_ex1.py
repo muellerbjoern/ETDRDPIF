@@ -10,12 +10,15 @@ from solver.etdrdpif.wrapper import wrap_Krylov, wrap_solve
 def main(solver, discretization=None):
 
     if solver == 'Krylov':
-        discretization = None
+        if discretization is None:
+            discretization = 'expv'
         solve = Krylov_solve
     else:
         solve = wrap_Krylov
         if discretization is None:
             discretization = 'central'
+
+    print(solver, discretization)
 
     # Parameters of the specific experiment
     square_len = 2 * np.pi
