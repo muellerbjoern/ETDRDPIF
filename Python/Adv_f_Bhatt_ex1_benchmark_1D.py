@@ -54,8 +54,8 @@ def benchmark_simple(dt, steps, a=1.0, out=False):
     u0 = u_old
 
     def F(u):
-        f1 = -b*u[0] + u[1] + A_Adv[0][0] @ u[0]
-        f2 = -c*u[1] + A_Adv[1][0] @ u[1]
+        f1 = -b*u[0] + u[1] - A_Adv[0][0] @ u[0]
+        f2 = -c*u[1] - A_Adv[0][1] @ u[1]
         Fr = [f1, f2]
         return Fr
 
