@@ -53,7 +53,7 @@ def main(solver, discretization=None):
     print(np.max(U_sol_rdp-Uex))
 
     a_vals = [0, 0.01, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1, 2, 3, 5, 10, 20, 100, 200, 500, 1000]
-    n = 5
+    n = 4
     errors_euclid = np.zeros((len(a_vals), n))
     errors_max = np.zeros((len(a_vals), n))
     orders_euclid = np.zeros((len(a_vals), n - 1))

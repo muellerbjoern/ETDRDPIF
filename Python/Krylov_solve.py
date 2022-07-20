@@ -190,6 +190,9 @@ def Krylov_solve(te, dt, steps, square_len, Adv, Diff, F, u0, boundary='periodic
         U_1 = sol1;V_1 = sol2;U_2 = U_1
         V_2 = V_1;U_3 = U_1; V_3 = V_1
 
+        if time.time() - start >= 12000:
+            raise ValueError("Runtime took too long")
+
     runtime = time.time()-start
     u_soln = sol1
 

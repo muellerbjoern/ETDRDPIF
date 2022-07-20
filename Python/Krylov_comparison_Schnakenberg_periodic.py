@@ -65,8 +65,12 @@ def main(solver, discretization=None):
                 print("Error occurred", e)
                 k = k/2
                 start += 1
+                if start >= n:
+                    break
             else:
                 break
+        if start >= n:
+            continue
         np.save(f"{experiment}_soln_a{a}_h0.01_over_{2**start}", sol)
         # print(np.min(sol), np.max(sol))
         # matsoln = scipy.io.loadmat("../MATLAB/matsoln.mat")["usoln"]
