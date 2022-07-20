@@ -111,7 +111,6 @@ if __name__ == "__main__":
     orders_array = []
     parameters_array = []
     a_vals = [0.1, 0.5, 0.8, 1, 1.5, 2, 3, 5, 10, 20, 50, 100]
-    a_vals = [1.0]
     for a in a_vals:
         print(f"a: {a}")
         h = 0.1
