@@ -156,6 +156,8 @@ def discretize_upwind_Fromm_periodic(steps, square_len, Diff, Adv):
 
     return x, steps, nodes, A
 
+# TODO: Allow different boundary conditions for different species
+
 def discretize_upwind_thirdorder_periodic(steps, square_len, Diff, Adv):
     num_species, dim = Adv.shape
 

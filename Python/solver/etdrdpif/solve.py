@@ -91,6 +91,7 @@ def etd_solve(dt, tlen, steps, A, u_old, F, save_all_steps=False):
                 # TODO: Aggregate RHS, might be faster due to BLAS routine?
                 #p{i_spec} = U3{i_spec, i_dim}\(L3{i_spec, i_dim}\p{i_spec});
                 #d{i_spec} = U3{i_spec, i_dim}\(L3{i_spec, i_dim}\d{i_spec});
+                #print(p[i_spec].shape, d[i_spec].shape)
                 p_d = LU3[i_dim][i_spec].solve(np.array([p[i_spec], d[i_spec]]).T)
                 p[i_spec] = p_d[:, 0]
                 d[i_spec] = p_d[:, 1]
